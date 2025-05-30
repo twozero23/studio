@@ -22,6 +22,8 @@ const ICON_OPTIONS = [
   { value: 'ShieldCheck', label: 'Shield Check (Security/QA)', icon: ShieldCheck },
 ];
 
+const NO_ICON_VALUE = "_NONE_"; // Special value for "No Icon"
+
 export default function AdminAchievementsPage() {
   const { portfolioData, updatePortfolioData, isLoading } = useAppContext();
 
@@ -38,25 +40,30 @@ export default function AdminAchievementsPage() {
     index: number,
     onChange: (index: number, updatedItem: Partial<AchievementHighlight>) => void
   ) => {
-    const handleChange = (field: keyof AchievementHighlight, value: string) => {
+    const handleFieldChange = (field: keyof AchievementHighlight, value: string) => {
       onChange(index, { [field]: value });
+    };
+
+    const handleIconChange = (selectedValue: string) => {
+      const actualValueToSave = selectedValue === NO_ICON_VALUE ? '' : selectedValue;
+      handleFieldChange('icon', actualValueToSave);
     };
 
     return (
       <div className="space-y-4 p-2 rounded-md border bg-card-muted/20">
-        <FormField id={`ach-metric-${index}`} label="Metric (e.g., 40%, 30.9M PKR)" value={item.metric} onChange={(e) => handleChange('metric', e.target.value)} />
-        <FormField id={`ach-desc-${index}`} label="Description" value={item.description} onChange={(e) => handleChange('description', e.target.value)} />
+        <FormField id={`ach-metric-${index}`} label="Metric (e.g., 40%, 30.9M PKR)" value={item.metric} onChange={(e) => handleFieldChange('metric', e.target.value)} />
+        <FormField id={`ach-desc-${index}`} label="Description" value={item.description} onChange={(e) => handleFieldChange('description', e.target.value)} />
         <div>
           <Label htmlFor={`ach-icon-${index}`} className="font-medium block mb-1">Icon (Optional)</Label>
           <Select
-            value={item.icon || ''}
-            onValueChange={(value) => handleChange('icon', value)}
+            value={item.icon || NO_ICON_VALUE} // Use NO_ICON_VALUE if item.icon is empty
+            onValueChange={handleIconChange}
           >
             <SelectTrigger id={`ach-icon-${index}`} className="w-full bg-background">
               <SelectValue placeholder="Select an icon" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">No Icon</SelectItem>
+              <SelectItem value={NO_ICON_VALUE}>No Icon</SelectItem>
               {ICON_OPTIONS.map(opt => (
                 <SelectItem key={opt.value} value={opt.value}>
                   <div className="flex items-center gap-2">
@@ -85,7 +92,7 @@ export default function AdminAchievementsPage() {
             id: `ach-${Date.now()}`,
             metric: '',
             description: '',
-            icon: 'Award',
+            icon: 'Award', // Default to an actual icon, or '' if "No Icon" should be default
           })}
           itemTypeName="Achievement"
         />
