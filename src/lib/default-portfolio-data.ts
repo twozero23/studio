@@ -11,6 +11,11 @@ export const defaultPortfolioData: PortfolioData = {
     email: 'naumanmehdi388@gmail.com',
     linkedin: 'linkedin.com/in/naumanmehdi',
     linktree: 'https://linktr.ee/naumanmehdi',
+    github: 'github.com/naumanmhd', // Added example github
+    phone: '+923217627021', // Added example phone
+    x: '', // Initialize new field
+    farcaster: '', // Initialize new field
+    poap: '', // Initialize new field
   },
   summary:
     'Highly accomplished Product Manager with over 8 years of distinguished experience in blockchain, Web3, and digital innovation, adept at driving significant user engagement and revenue growth through strategic product development. Proven leader in delivering high-impact DeFi platforms, NFT marketplaces, and comprehensive blockchain solutions.',
@@ -150,7 +155,9 @@ export const defaultPortfolioData: PortfolioData = {
       description: 'Led the development of a secure and user-friendly platform for cryptocurrency investments, focusing on seamless user experience and robust security features.',
       role: 'Product Lead',
       highlights: ['Ensured regulatory compliance.', 'Achieved high user adoption rates post-launch.'],
-      technologies: ['Blockchain', 'React', 'Node.js']
+      technologies: ['Blockchain', 'React', 'Node.js'],
+      imageUrl: 'https://placehold.co/600x400.png',
+      projectUrl: 'https://example.com/crypto-platform'
     },
     {
       id: 'proj2',
@@ -158,7 +165,9 @@ export const defaultPortfolioData: PortfolioData = {
       description: 'Designed and launched a robust marketplace for digital collectibles, enabling artists and collectors to trade NFTs efficiently and securely.',
       role: 'Product Designer & Manager',
       highlights: ['Implemented innovative bidding and auction mechanisms.', 'Fostered a vibrant community around the platform.'],
-      technologies: ['Solana', 'Next.js', 'IPFS']
+      technologies: ['Solana', 'Next.js', 'IPFS'],
+      imageUrl: 'https://placehold.co/600x400.png',
+      projectUrl: 'https://example.com/nft-marketplace'
     },
     {
       id: 'proj3',
@@ -166,7 +175,9 @@ export const defaultPortfolioData: PortfolioData = {
       description: 'Developed a decentralized application enabling users to stake various cryptocurrencies and earn rewards, featuring transparent on-chain logic.',
       role: 'Lead Developer & Product Owner',
       highlights: ['Audited smart contracts for security.', 'Integrated multiple wallet providers for ease of access.'],
-      technologies: ['Ethereum', 'Solidity', 'Web3.js']
+      technologies: ['Ethereum', 'Solidity', 'Web3.js'],
+      imageUrl: 'https://placehold.co/600x400.png',
+      projectUrl: 'https://example.com/defi-dapp'
     },
   ],
   achievements: [
@@ -214,9 +225,9 @@ export const defaultPortfolioData: PortfolioData = {
     },
   ],
   theme: {
-    accentColor: DEFAULT_ACCENT_COLOR, // Updated to new default (Vibrant Coral)
+    accentColor: DEFAULT_ACCENT_COLOR, 
     font: DEFAULT_FONT,
-    profilePictureUrl: '', // Initially no picture
+    profilePictureUrl: '', 
   },
   customSections: [],
 };

@@ -5,6 +5,9 @@ export interface ContactInfo {
   linktree: string;
   phone?: string; // Optional
   github?: string; // Optional
+  x?: string; // Optional - for X (Twitter)
+  farcaster?: string; // Optional
+  poap?: string; // Optional
 }
 
 export interface ExperienceEntry {

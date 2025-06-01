@@ -129,6 +129,30 @@ export default function AdminGeneralPage() {
             value={portfolioData.contact.github || ''}
             onChange={(e) => handleContactChange('github', e.target.value)}
           />
+          <FormField
+            id="x"
+            label="X (Twitter) Profile URL (Optional)"
+            type="url"
+            value={portfolioData.contact.x || ''}
+            onChange={(e) => handleContactChange('x', e.target.value)}
+            placeholder="https://x.com/username"
+          />
+          <FormField
+            id="farcaster"
+            label="Farcaster Profile URL (Optional)"
+            type="url"
+            value={portfolioData.contact.farcaster || ''}
+            onChange={(e) => handleContactChange('farcaster', e.target.value)}
+            placeholder="https://warpcast.com/username"
+          />
+          <FormField
+            id="poap"
+            label="POAP Profile URL (Optional)"
+            type="url"
+            value={portfolioData.contact.poap || ''}
+            onChange={(e) => handleContactChange('poap', e.target.value)}
+            placeholder="https://app.poap.xyz/user/address_or_ens"
+          />
         </div>
       </EditableSectionWrapper>
     </AdminLayout>
