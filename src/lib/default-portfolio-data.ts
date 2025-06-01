@@ -1,3 +1,4 @@
+
 import type { PortfolioData } from './portfolio-data-types';
 import { DEFAULT_ACCENT_COLOR, DEFAULT_FONT } from './portfolio-data-types';
 
@@ -213,7 +214,7 @@ export const defaultPortfolioData: PortfolioData = {
     },
   ],
   theme: {
-    accentColor: DEFAULT_ACCENT_COLOR,
+    accentColor: DEFAULT_ACCENT_COLOR, // Updated to new default (Vibrant Coral)
     font: DEFAULT_FONT,
     profilePictureUrl: '', // Initially no picture
   },

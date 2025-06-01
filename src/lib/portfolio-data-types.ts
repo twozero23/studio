@@ -115,5 +115,5 @@ export const AVAILABLE_FONTS = [
 
 export type FontOption = typeof AVAILABLE_FONTS[number]['name'];
 
-export const DEFAULT_ACCENT_COLOR = '#64B5F6'; // Soft Blue
+export const DEFAULT_ACCENT_COLOR = '#F88A78'; // Vibrant Coral (hsl(10, 85%, 65%))
 export const DEFAULT_FONT: FontOption = 'Geist Sans';
