@@ -1,5 +1,6 @@
 
 "use client";
+import React, { useCallback } from 'react'; // Added useCallback
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
 import { ArrayManager } from '@/components/admin/ArrayManager';
@@ -33,8 +34,7 @@ export default function AdminSkillsPage() {
     }));
   };
 
-  const renderSkillItem = (
-    skillType: 'technical' | 'tools' | 'soft',
+  const renderTechnicalSkillItem = useCallback((
     item: Skill,
     index: number,
     onChange: (index: number, updatedItem: Partial<Skill>) => void
@@ -42,33 +42,48 @@ export default function AdminSkillsPage() {
     const handleChange = (field: keyof Skill, value: string | number | undefined) => {
       onChange(index, { [field]: value });
     };
+    return (
+      <div className="space-y-4 p-2 rounded-md border bg-card-muted/20">
+        <FormField id={`skill-name-technical-${index}`} label="Skill Name" value={item.name} onChange={(e) => handleChange('name', e.target.value)} />
+        <div>
+          <Label htmlFor={`skill-category-${index}`} className="font-medium">Category</Label>
+          <Select
+            value={item.category || ''}
+            onValueChange={(value) => handleChange('category', value)}
+          >
+            <SelectTrigger id={`skill-category-${index}`} className="w-full bg-background">
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              {SKILL_CATEGORIES.map(cat => (
+                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    );
+  }, []); // SKILL_CATEGORIES is a module-level constant
 
+  const renderGenericSkillItem = useCallback((
+    skillType: 'tools' | 'soft', // To help generate unique IDs
+    item: Skill,
+    index: number,
+    onChange: (index: number, updatedItem: Partial<Skill>) => void
+  ) => {
+    const handleChange = (field: keyof Skill, value: string | number | undefined) => {
+      onChange(index, { [field]: value });
+    };
     return (
       <div className="space-y-4 p-2 rounded-md border bg-card-muted/20">
         <FormField id={`skill-name-${skillType}-${index}`} label="Skill Name" value={item.name} onChange={(e) => handleChange('name', e.target.value)} />
-        {skillType === 'technical' && (
-          <div>
-            <Label htmlFor={`skill-category-${index}`} className="font-medium">Category</Label>
-            <Select
-              value={item.category || ''}
-              onValueChange={(value) => handleChange('category', value)}
-            >
-              <SelectTrigger id={`skill-category-${index}`} className="w-full bg-background">
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                {SKILL_CATEGORIES.map(cat => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-         {/* Optional: Add proficiency level field if needed later */}
-         {/* <FormField id={`skill-level-${index}`} label="Proficiency (1-5, Optional)" type="number" value={item.level || ''} onChange={(e) => handleChange('level', parseInt(e.target.value) || undefined)} /> */}
       </div>
     );
-  };
+  }, []);
+
+  const generateNewTechnicalSkill = useCallback(() => ({ id: `techskill-${Date.now()}`, name: '', category: SKILL_CATEGORIES[0] }), []);
+  const generateNewToolSkill = useCallback(() => ({ id: `toolskill-${Date.now()}`, name: '' }), []);
+  const generateNewSoftSkill = useCallback(() => ({ id: `softskill-${Date.now()}`, name: '' }), []);
 
   return (
     <AdminLayout>
@@ -81,8 +96,8 @@ export default function AdminSkillsPage() {
           <ArrayManager
             items={portfolioData.skills.technical}
             setItems={(newSkills) => setSkills('technical', newSkills)}
-            renderItem={(item, index, onChange) => renderSkillItem('technical', item, index, onChange)}
-            generateNewItem={() => ({ id: `techskill-${Date.now()}`, name: '', category: SKILL_CATEGORIES[0] })}
+            renderItem={renderTechnicalSkillItem}
+            generateNewItem={generateNewTechnicalSkill}
             itemTypeName="Technical Skill"
           />
         </div>
@@ -91,8 +106,8 @@ export default function AdminSkillsPage() {
           <ArrayManager
             items={portfolioData.skills.tools}
             setItems={(newSkills) => setSkills('tools', newSkills)}
-            renderItem={(item, index, onChange) => renderSkillItem('tools',item, index, onChange)}
-            generateNewItem={() => ({ id: `toolskill-${Date.now()}`, name: '' })}
+            renderItem={(item, index, onChange) => renderGenericSkillItem('tools', item, index, onChange)}
+            generateNewItem={generateNewToolSkill}
             itemTypeName="Tool"
           />
         </div>
@@ -101,8 +116,8 @@ export default function AdminSkillsPage() {
           <ArrayManager
             items={portfolioData.skills.soft}
             setItems={(newSkills) => setSkills('soft', newSkills)}
-            renderItem={(item, index, onChange) => renderSkillItem('soft', item, index, onChange)}
-            generateNewItem={() => ({ id: `softskill-${Date.now()}`, name: '' })}
+            renderItem={(item, index, onChange) => renderGenericSkillItem('soft', item, index, onChange)}
+            generateNewItem={generateNewSoftSkill}
             itemTypeName="Soft Skill"
           />
         </div>

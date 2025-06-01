@@ -1,5 +1,6 @@
 
 "use client";
+import React, { useCallback } from 'react'; // Added useCallback
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
 import { ArrayManager, StringListManager } from '@/components/admin/ArrayManager';
@@ -19,7 +20,7 @@ export default function AdminExperiencePage() {
     updatePortfolioData(prev => ({ ...prev!, experience: newExperience }));
   };
 
-  const renderExperienceItem = (
+  const renderExperienceItem = useCallback((
     item: ExperienceEntry,
     index: number,
     onChange: (index: number, updatedItem: Partial<ExperienceEntry>) => void
@@ -53,7 +54,17 @@ export default function AdminExperiencePage() {
         </div>
       </div>
     );
-  };
+  }, []);
+
+  const generateNewExperienceItem = useCallback(() => ({
+    id: `exp-${Date.now()}`,
+    role: '',
+    company: '',
+    period: '',
+    location: '',
+    responsibilities: [],
+    achievements: [],
+  }), []);
 
   return (
     <AdminLayout>
@@ -65,15 +76,7 @@ export default function AdminExperiencePage() {
           items={portfolioData.experience}
           setItems={setExperience}
           renderItem={renderExperienceItem}
-          generateNewItem={() => ({
-            id: `exp-${Date.now()}`,
-            role: '',
-            company: '',
-            period: '',
-            location: '',
-            responsibilities: [],
-            achievements: [],
-          })}
+          generateNewItem={generateNewExperienceItem}
           itemTypeName="Experience Entry"
         />
       </EditableSectionWrapper>

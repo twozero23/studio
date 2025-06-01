@@ -16,7 +16,7 @@ interface FormFieldProps {
   rows?: number; // for textarea
 }
 
-export const FormFieldComponent: React.FC<FormFieldProps> = ({
+const FormFieldComponentInternal: React.FC<FormFieldProps> = ({
   id,
   label,
   type = 'text',
@@ -57,3 +57,5 @@ export const FormFieldComponent: React.FC<FormFieldProps> = ({
     </div>
   );
 };
+
+export const FormFieldComponent = React.memo(FormFieldComponentInternal);

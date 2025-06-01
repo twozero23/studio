@@ -1,5 +1,6 @@
 
 "use client";
+import React, { useCallback } from 'react'; // Added useCallback
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
 import { ArrayManager } from '@/components/admin/ArrayManager';
@@ -35,7 +36,7 @@ export default function AdminAchievementsPage() {
     updatePortfolioData(prev => ({ ...prev!, achievements: newAchievements }));
   };
 
-  const renderAchievementItem = (
+  const renderAchievementItem = useCallback((
     item: AchievementHighlight,
     index: number,
     onChange: (index: number, updatedItem: Partial<AchievementHighlight>) => void
@@ -56,7 +57,7 @@ export default function AdminAchievementsPage() {
         <div>
           <Label htmlFor={`ach-icon-${index}`} className="font-medium block mb-1">Icon (Optional)</Label>
           <Select
-            value={item.icon || NO_ICON_VALUE} // Use NO_ICON_VALUE if item.icon is empty
+            value={item.icon || NO_ICON_VALUE} 
             onValueChange={handleIconChange}
           >
             <SelectTrigger id={`ach-icon-${index}`} className="w-full bg-background">
@@ -76,7 +77,14 @@ export default function AdminAchievementsPage() {
         </div>
       </div>
     );
-  };
+  }, []); // ICON_OPTIONS and NO_ICON_VALUE are module-level constants
+
+  const generateNewAchievementItem = useCallback(() => ({
+    id: `ach-${Date.now()}`,
+    metric: '',
+    description: '',
+    icon: 'Award', 
+  }), []);
 
   return (
     <AdminLayout>
@@ -88,12 +96,7 @@ export default function AdminAchievementsPage() {
           items={portfolioData.achievements}
           setItems={setAchievements}
           renderItem={renderAchievementItem}
-          generateNewItem={() => ({
-            id: `ach-${Date.now()}`,
-            metric: '',
-            description: '',
-            icon: 'Award', // Default to an actual icon, or '' if "No Icon" should be default
-          })}
+          generateNewItem={generateNewAchievementItem}
           itemTypeName="Achievement"
         />
       </EditableSectionWrapper>

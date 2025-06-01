@@ -1,5 +1,6 @@
 
 "use client";
+import React, { useCallback } from 'react'; // Added useCallback
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
 import { ArrayManager } from '@/components/admin/ArrayManager';
@@ -18,7 +19,7 @@ export default function AdminEducationPage() {
     updatePortfolioData(prev => ({ ...prev!, education: newEducation }));
   };
 
-  const renderEducationItem = (
+  const renderEducationItem = useCallback((
     item: EducationEntry,
     index: number,
     onChange: (index: number, updatedItem: Partial<EducationEntry>) => void
@@ -35,7 +36,15 @@ export default function AdminEducationPage() {
         <FormField id={`edu-grade-${index}`} label="Grade / Details (Optional)" value={item.grade || ''} onChange={(e) => handleChange('grade', e.target.value)} />
       </div>
     );
-  };
+  }, []);
+
+  const generateNewEducationItem = useCallback(() => ({
+    id: `edu-${Date.now()}`,
+    degree: '',
+    institution: '',
+    period: '',
+    grade: '',
+  }), []);
 
   return (
     <AdminLayout>
@@ -47,13 +56,7 @@ export default function AdminEducationPage() {
           items={portfolioData.education}
           setItems={setEducation}
           renderItem={renderEducationItem}
-          generateNewItem={() => ({
-            id: `edu-${Date.now()}`,
-            degree: '',
-            institution: '',
-            period: '',
-            grade: '',
-          })}
+          generateNewItem={generateNewEducationItem}
           itemTypeName="Education Entry"
         />
       </EditableSectionWrapper>

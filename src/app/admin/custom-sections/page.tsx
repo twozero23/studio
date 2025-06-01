@@ -1,5 +1,6 @@
 
 "use client";
+import React, { useCallback } from 'react'; // Added useCallback
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
 import { ArrayManager, StringListManager } from '@/components/admin/ArrayManager';
@@ -22,8 +23,8 @@ export default function AdminCustomSectionsPage() {
     updatePortfolioData(prev => ({ ...prev!, customSections: newSections }));
   };
 
-  const renderCustomField = (
-    sectionIndex: number,
+  const renderCustomField = useCallback((
+    sectionIndex: number, // Not directly used but part of a closure if this was memoized independently
     field: CustomField,
     fieldIndex: number,
     onFieldChange: (sectionIndex: number, fieldIndex: number, updatedField: Partial<CustomField>) => void,
@@ -48,9 +49,10 @@ export default function AdminCustomSectionsPage() {
         <Trash2 className="h-4 w-4 text-destructive" />
       </Button>
     </div>
-  );
+  ), []);
 
-  const renderCustomSectionItem = (
+
+  const renderCustomSectionItem = useCallback((
     item: CustomSectionEntry,
     index: number,
     onChange: (index: number, updatedItem: Partial<CustomSectionEntry>) => void
@@ -59,20 +61,20 @@ export default function AdminCustomSectionsPage() {
       onChange(index, { title: value });
     };
 
-    const handleFieldChange = (sectionIndex: number, fieldIndex: number, updatedField: Partial<CustomField>) => {
+    const handleFieldChange = (fieldIndex: number, updatedField: Partial<CustomField>) => {
       const updatedItems = [...item.items];
       updatedItems[fieldIndex] = { ...updatedItems[fieldIndex], ...updatedField };
-      onChange(sectionIndex, { items: updatedItems });
+      onChange(index, { items: updatedItems });
     };
 
-    const handleAddField = (sectionIndex: number) => {
+    const handleAddField = () => {
       const newField: CustomField = { id: `field-${Date.now()}`, key: '', value: '' };
-      onChange(sectionIndex, { items: [...item.items, newField] });
+      onChange(index, { items: [...item.items, newField] });
     };
 
-    const handleRemoveField = (sectionIndex: number, fieldIndex: number) => {
+    const handleRemoveField = (fieldIndex: number) => {
       const filteredItems = item.items.filter((_, idx) => idx !== fieldIndex);
-      onChange(sectionIndex, { items: filteredItems });
+      onChange(index, { items: filteredItems });
     };
 
     return (
@@ -88,16 +90,25 @@ export default function AdminCustomSectionsPage() {
           <Label className="font-medium mb-2 block">Fields in this section:</Label>
           <div className="space-y-3">
             {item.items.map((field, fieldIndex) =>
-              renderCustomField(index, field, fieldIndex, handleFieldChange, handleRemoveField)
+              renderCustomField(index, field, fieldIndex, 
+                (_sIdx, fIdx, uField) => handleFieldChange(fIdx, uField), 
+                (_sIdx, fIdx) => handleRemoveField(fIdx)
+              )
             )}
           </div>
-          <Button type="button" variant="outline" size="sm" onClick={() => handleAddField(index)} className="mt-3">
+          <Button type="button" variant="outline" size="sm" onClick={() => handleAddField()} className="mt-3">
             <PlusCircle className="h-4 w-4 mr-2" /> Add Field to this Section
           </Button>
         </div>
       </div>
     );
-  };
+  }, [renderCustomField]); // renderCustomField is memoized
+
+  const generateNewCustomSectionItem = useCallback(() => ({
+    id: `custom-section-${Date.now()}`,
+    title: '',
+    items: [{ id: `field-${Date.now()}`, key: '', value: '' }],
+  }), []);
 
   return (
     <AdminLayout>
@@ -109,11 +120,7 @@ export default function AdminCustomSectionsPage() {
           items={portfolioData.customSections || []}
           setItems={setCustomSections}
           renderItem={renderCustomSectionItem}
-          generateNewItem={() => ({
-            id: `custom-section-${Date.now()}`,
-            title: '',
-            items: [{ id: `field-${Date.now()}`, key: '', value: '' }],
-          })}
+          generateNewItem={generateNewCustomSectionItem}
           itemTypeName="Custom Section"
         />
       </EditableSectionWrapper>

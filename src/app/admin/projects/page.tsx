@@ -1,5 +1,6 @@
 
 "use client";
+import React, { useCallback } from 'react'; // Added useCallback
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
 import { ArrayManager, StringListManager } from '@/components/admin/ArrayManager';
@@ -19,7 +20,7 @@ export default function AdminProjectsPage() {
     updatePortfolioData(prev => ({ ...prev!, projects: newProjects }));
   };
 
-  const renderProjectItem = (
+  const renderProjectItem = useCallback((
     item: ProjectEntry,
     index: number,
     onChange: (index: number, updatedItem: Partial<ProjectEntry>) => void
@@ -54,7 +55,18 @@ export default function AdminProjectsPage() {
         </div>
       </div>
     );
-  };
+  }, []);
+
+  const generateNewProjectItem = useCallback(() => ({
+    id: `proj-${Date.now()}`,
+    name: '',
+    description: '',
+    role: '',
+    highlights: [],
+    technologies: [],
+    imageUrl: '',
+    projectUrl: '',
+  }), []);
 
   return (
     <AdminLayout>
@@ -66,16 +78,7 @@ export default function AdminProjectsPage() {
           items={portfolioData.projects}
           setItems={setProjects}
           renderItem={renderProjectItem}
-          generateNewItem={() => ({
-            id: `proj-${Date.now()}`,
-            name: '',
-            description: '',
-            role: '',
-            highlights: [],
-            technologies: [],
-            imageUrl: '',
-            projectUrl: '',
-          })}
+          generateNewItem={generateNewProjectItem}
           itemTypeName="Project"
         />
       </EditableSectionWrapper>

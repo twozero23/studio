@@ -1,5 +1,6 @@
 
 "use client";
+import React, { useCallback } from 'react'; // Added useCallback
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
 import { ArrayManager } from '@/components/admin/ArrayManager';
@@ -22,7 +23,7 @@ export default function AdminCommunityCertsPage() {
     updatePortfolioData(prev => ({ ...prev!, certifications: newEntries }));
   };
 
-  const renderCommunityItem = (
+  const renderCommunityItem = useCallback((
     item: CommunityEntry,
     index: number,
     onChange: (index: number, updatedItem: Partial<CommunityEntry>) => void
@@ -31,9 +32,11 @@ export default function AdminCommunityCertsPage() {
       <FormField id={`comm-name-${index}`} label="Community/Organization Name" value={item.name} onChange={(e) => onChange(index, { name: e.target.value })} />
       <FormField id={`comm-role-${index}`} label="Your Role (Optional, e.g., Member, Contributor)" value={item.role || ''} onChange={(e) => onChange(index, { role: e.target.value })} />
     </div>
-  );
+  ), []);
 
-  const renderCertificationItem = (
+  const generateNewCommunityItem = useCallback(() => ({ id: `comm-${Date.now()}`, name: '', role: '' }), []);
+
+  const renderCertificationItem = useCallback((
     item: CertificationEntry,
     index: number,
     onChange: (index: number, updatedItem: Partial<CertificationEntry>) => void
@@ -43,7 +46,9 @@ export default function AdminCommunityCertsPage() {
       <FormField id={`cert-issuer-${index}`} label="Issuing Organization (Optional)" value={item.issuer || ''} onChange={(e) => onChange(index, { issuer: e.target.value })} />
       <FormField id={`cert-date-${index}`} label="Date Issued (Optional)" value={item.date || ''} onChange={(e) => onChange(index, { date: e.target.value })} />
     </div>
-  );
+  ), []);
+  
+  const generateNewCertificationItem = useCallback(() => ({ id: `cert-${Date.now()}`, name: '', issuer: '', date: '' }), []);
 
   return (
     <AdminLayout>
@@ -57,7 +62,7 @@ export default function AdminCommunityCertsPage() {
             items={portfolioData.communityInvolvement}
             setItems={setCommunityInvolvement}
             renderItem={renderCommunityItem}
-            generateNewItem={() => ({ id: `comm-${Date.now()}`, name: '', role: '' })}
+            generateNewItem={generateNewCommunityItem}
             itemTypeName="Community Entry"
           />
         </div>
@@ -67,7 +72,7 @@ export default function AdminCommunityCertsPage() {
             items={portfolioData.certifications}
             setItems={setCertifications}
             renderItem={renderCertificationItem}
-            generateNewItem={() => ({ id: `cert-${Date.now()}`, name: '', issuer: '', date: '' })}
+            generateNewItem={generateNewCertificationItem}
             itemTypeName="Certification"
           />
         </div>

@@ -1,6 +1,6 @@
 
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react'; // Added useCallback
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Trash2, Edit2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -23,48 +23,58 @@ export function ArrayManager<T extends { id: string }>({
 }: ArrayManagerProps<T>) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-  const handleAddItem = () => {
+  const handleAddItem = useCallback(() => {
     const newItem = generateNewItem();
-    setItems([...items, newItem]);
-    setEditingIndex(items.length); // Open the new item for editing
-  };
+    setItems((prevItems: T[]) => [...prevItems, newItem]);
+    setEditingIndex(items.length); // Open the new item for editing - items.length before adding new
+  }, [generateNewItem, setItems, items.length]);
 
-  const handleRemoveItem = (index: number) => {
-    setItems(items.filter((_, i) => i !== index));
-    if (editingIndex === index) {
-      setEditingIndex(null);
-    } else if (editingIndex !== null && editingIndex > index) {
-      setEditingIndex(editingIndex - 1);
-    }
-  };
+  const handleRemoveItem = useCallback((index: number) => {
+    setItems((prevItems: T[]) => prevItems.filter((_, i) => i !== index));
+    setEditingIndex(currentEditingIndex => {
+      if (currentEditingIndex === index) {
+        return null;
+      } else if (currentEditingIndex !== null && currentEditingIndex > index) {
+        return currentEditingIndex - 1;
+      }
+      return currentEditingIndex;
+    });
+  }, [setItems]);
 
-  const handleItemChange = (index: number, updatedItem: Partial<T>) => {
-    const newItems = [...items];
-    newItems[index] = { ...newItems[index], ...updatedItem };
-    setItems(newItems);
-  };
+  const handleItemChange = useCallback((index: number, updatedItem: Partial<T>) => {
+    setItems((prevItems: T[]) => {
+      const newItems = [...prevItems];
+      newItems[index] = { ...newItems[index], ...updatedItem };
+      return newItems;
+    });
+  }, [setItems]);
   
-  const handleMoveItem = (index: number, direction: 'up' | 'down') => {
-    if (direction === 'up' && index === 0) return;
-    if (direction === 'down' && index === items.length - 1) return;
+  const handleMoveItem = useCallback((index: number, direction: 'up' | 'down') => {
+    setItems((prevItems: T[]) => {
+      if (direction === 'up' && index === 0) return prevItems;
+      if (direction === 'down' && index === prevItems.length - 1) return prevItems;
 
-    const newItems = [...items];
-    const itemToMove = newItems[index];
-    if (direction === 'up') {
-      newItems[index] = newItems[index - 1];
-      newItems[index - 1] = itemToMove;
-    } else { // down
-      newItems[index] = newItems[index + 1];
-      newItems[index + 1] = itemToMove;
-    }
-    setItems(newItems);
-    // Adjust editing index if the currently edited item moved
-    if (editingIndex === index) {
-      setEditingIndex(direction === 'up' ? index - 1 : index + 1);
-    } else if (editingIndex === (direction === 'up' ? index - 1 : index + 1)) {
-      setEditingIndex(index);
-    }
-  };
+      const newItems = [...prevItems];
+      const itemToMove = newItems[index];
+      if (direction === 'up') {
+        newItems[index] = newItems[index - 1];
+        newItems[index - 1] = itemToMove;
+      } else { // down
+        newItems[index] = newItems[index + 1];
+        newItems[index + 1] = itemToMove;
+      }
+      return newItems;
+    });
+     // Adjust editing index if the currently edited item moved
+    setEditingIndex(currentEditingIndex => {
+      if (currentEditingIndex === index) {
+        return direction === 'up' ? index - 1 : index + 1;
+      } else if (currentEditingIndex === (direction === 'up' ? index - 1 : index + 1)) {
+        return index;
+      }
+      return currentEditingIndex;
+    });
+  }, [setItems]);
 
 
   return (
@@ -117,14 +127,16 @@ interface StringListManagerProps {
   label: string; // e.g. "Responsibility"
 }
 
-export const StringListManager: React.FC<StringListManagerProps> = ({ list, setList, label }) => {
-  const handleAddString = () => setList([...list, '']);
-  const handleRemoveString = (index: number) => setList(list.filter((_, i) => i !== index));
-  const handleStringChange = (index: number, value: string) => {
+const StringListManagerInternal: React.FC<StringListManagerProps> = ({ list, setList, label }) => {
+  const handleAddString = useCallback(() => setList([...list, '']), [list, setList]);
+  
+  const handleRemoveString = useCallback((index: number) => setList(list.filter((_, i) => i !== index)), [list, setList]);
+  
+  const handleStringChange = useCallback((index: number, value: string) => {
     const newList = [...list];
     newList[index] = value;
     setList(newList);
-  };
+  }, [list, setList]);
 
   return (
     <div className="space-y-2">
@@ -148,6 +160,7 @@ export const StringListManager: React.FC<StringListManagerProps> = ({ list, setL
     </div>
   );
 };
+export const StringListManager = React.memo(StringListManagerInternal);
 
 // Re-exporting Input to avoid direct import of shadcn/ui/input in multiple admin pages
 import { Input } from '@/components/ui/input';
