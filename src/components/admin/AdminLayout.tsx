@@ -1,10 +1,10 @@
 
 "use client";
 import Link from 'next/link';
-import { Home, Edit3, Palette, Save, Eye, AlertTriangle, Trash2 } from 'lucide-react';
+import { Home, Edit3, Palette, Save, Eye, AlertTriangle, Trash2, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useAppContext } from '@/components/AppProviders';
 import {
@@ -35,6 +35,7 @@ const AdminNavLinks = [
 
 export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
+  const router = useRouter();
   const { portfolioData, resetPortfolioData } = useAppContext();
   const { toast } = useToast();
 
@@ -54,6 +55,10 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
       description: "Portfolio data has been reset to defaults.",
       variant: "default",
     });
+  };
+
+  const handleLogout = async () => {
+    router.push('/api/auth/logout');
   };
 
 
@@ -119,17 +124,17 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             <Button onClick={handleSaveChanges}>
               <Save className="mr-2 h-4 w-4" /> Save Changes
             </Button>
+             <Button variant="outline" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" /> Logout
+            </Button>
           </div>
         </header>
         <main className="flex-1 p-4 sm:px-6 sm:py-0 space-y-6">
-          {portfolioData ? children : 
-            <div className="flex items-center justify-center h-[calc(100vh-100px)]">
-                <div className="text-center">
-                    <Palette className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-xl text-muted-foreground">Loading editor...</p>
-                </div>
-            </div>
-          }
+          {/* Removed conditional rendering based on portfolioData for children, 
+             assuming auth check happens before this layout is fully rendered or children handle their own loading.
+             If children depend on portfolioData, that should be handled within them or passed down.
+             The original loading state was for portfolioData, not auth state. */}
+          {children}
         </main>
       </div>
     </div>
