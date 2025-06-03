@@ -64,9 +64,28 @@ export const AchievementsSection = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
         {achievements.map(achievement => {
           const IconComponent = achievement.icon ? iconMap[achievement.icon] || Award : Award;
-          const targetValue = parseMetric(achievement.metric);
-          const suffix = getSuffix(achievement.metric);
-          const prefix = getPrefix(achievement.metric);
+          const rawMetricString = achievement.metric;
+          let metricContent;
+
+          const animatedValue = parseMetric(rawMetricString);
+          const suffix = getSuffix(rawMetricString);
+          const prefix = getPrefix(rawMetricString);
+
+          // Condition for using AnimatedCounter:
+          // - animatedValue must be a finite number.
+          // - If animatedValue is 0, the rawMetricString should actually represent zero (e.g., "0", "0%", "0.0").
+          //   Otherwise, a 0 probably means parsing a textual metric failed.
+          const isTrulyZero = rawMetricString.trim().match(/^(0%?|0\.0%?)$/);
+          const shouldUseAnimatedCounter = isFinite(animatedValue) && (animatedValue !== 0 || !!isTrulyZero);
+
+          if (shouldUseAnimatedCounter) {
+            metricContent = (
+              <AnimatedCounter targetValue={animatedValue} duration={2000} suffix={suffix} prefix={prefix} />
+            );
+          } else {
+            // If not suitable for animation, display the raw metric string
+            metricContent = <>{rawMetricString}</>;
+          }
           
           return (
             <Card key={achievement.id} className="text-center shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
@@ -75,7 +94,7 @@ export const AchievementsSection = () => {
                     <IconComponent className="h-8 w-8 text-primary" style={{ color: 'hsl(var(--primary))' }} />
                  </div>
                 <CardTitle className="text-3xl md:text-4xl font-bold text-primary" style={{ color: 'hsl(var(--primary))' }}>
-                  <AnimatedCounter targetValue={targetValue} duration={2000} suffix={suffix} prefix={prefix}/>
+                  {metricContent}
                 </CardTitle>
               </CardHeader>
               <CardContent>
