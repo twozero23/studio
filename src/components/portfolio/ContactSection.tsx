@@ -33,10 +33,10 @@ interface ContactItemProps {
 }
 
 const ContactItem: React.FC<ContactItemProps> = ({ icon: Icon, text, href, ariaLabel }) => (
-  <Button variant="ghost" asChild className="justify-start text-lg p-4 hover:bg-primary/10 group w-full sm:w-auto">
+  <Button variant="ghost" asChild className="justify-start text-lg p-3 hover:bg-primary/10 group w-auto">
     <NextLink href={href} target="_blank" rel="noopener noreferrer" aria-label={ariaLabel}>
-      <Icon className="h-6 w-6 mr-3 text-primary group-hover:scale-110 transition-transform" style={{ color: 'hsl(var(--primary))' }} />
-      <span className="text-foreground group-hover:text-primary">{text}</span>
+      <Icon className="h-5 w-5 mr-2 text-primary group-hover:scale-110 transition-transform" style={{ color: 'hsl(var(--primary))' }} />
+      <span className="text-foreground group-hover:text-primary text-sm sm:text-base">{text}</span>
     </NextLink>
   </Button>
 );
@@ -60,16 +60,16 @@ export const ContactSection = () => {
 
   return (
     <SectionLayout id="contact" title="Let's Connect" icon={Mail}>
-      <Card className="max-w-lg mx-auto shadow-xl p-6 md:p-8">
+      <Card className="max-w-2xl mx-auto shadow-xl p-6 md:p-8">
         <CardContent className="text-center">
           <p className="text-lg text-muted-foreground mb-8">
             I'm always open to discussing new projects, creative ideas, or opportunities to be part of something transformative. Feel free to reach out!
           </p>
-          <div className="flex flex-col items-center space-y-4">
+          <div className="flex flex-row flex-wrap justify-center items-center gap-x-4 gap-y-3">
             <ContactItem icon={Mail} text={contact.email} href={`mailto:${contact.email}`} ariaLabel="Email Nauman Mehdi"/>
-            <ContactItem icon={Linkedin} text="LinkedIn Profile" href={`https://${contact.linkedin}`} ariaLabel="Nauman Mehdi's LinkedIn Profile"/>
-            {contact.github && <ContactItem icon={Github} text="GitHub Profile" href={contact.github.startsWith('http') ? contact.github : `https://${contact.github}`} ariaLabel="Nauman Mehdi's GitHub Profile"/>}
-            {contact.x && <ContactItem icon={Twitter} text="X (Twitter)" href={contact.x} ariaLabel="Nauman Mehdi's X Profile"/>}
+            <ContactItem icon={Linkedin} text="LinkedIn" href={`https://${contact.linkedin}`} ariaLabel="Nauman Mehdi's LinkedIn Profile"/>
+            {contact.github && <ContactItem icon={Github} text="GitHub" href={contact.github.startsWith('http') ? contact.github : `https://${contact.github}`} ariaLabel="Nauman Mehdi's GitHub Profile"/>}
+            {contact.x && <ContactItem icon={Twitter} text="X" href={contact.x} ariaLabel="Nauman Mehdi's X Profile"/>}
             {contact.farcaster && <ContactItem icon={FarcasterIcon} text="Farcaster" href={contact.farcaster} ariaLabel="Nauman Mehdi's Farcaster Profile"/>}
             {contact.poap && <ContactItem icon={POAPIcon} text="POAP" href={contact.poap} ariaLabel="Nauman Mehdi's POAP Gallery"/>}
             {contact.linktree && <ContactItem icon={LinkIcon} text="Linktree" href={contact.linktree} ariaLabel="Nauman Mehdi's Linktree"/>}
