@@ -30,23 +30,19 @@ export const AppProviders = ({ children }: { children: ReactNode }) => {
       const fontPreference = AVAILABLE_FONTS.find(f => f.name === portfolioData.theme.font)?.value || AVAILABLE_FONTS.find(f => f.name === DEFAULT_FONT)?.value;
       document.body.style.fontFamily = fontPreference as string;
 
-      // Apply accent color
-      document.documentElement.style.setProperty('--custom-accent', portfolioData.theme.accentColor);
-      // Update ShadCN variable if it's distinct or if we want to override default accent
-      document.documentElement.style.setProperty('--accent-h', portfolioData.theme.accentColor.match(/hsl\(([^,]+),/)?.[1] || '260');
-      document.documentElement.style.setProperty('--accent-s', portfolioData.theme.accentColor.match(/,\s*([^%]+)%,/)?.[1] || '47%');
-      document.documentElement.style.setProperty('--accent-l', portfolioData.theme.accentColor.match(/,\s*[^%]+%,\s*([^%]+)%\)/)?.[1] || '63%');
-      
-      // For ShadCN variables that use HSL values directly:
-      // Assuming accentColor is stored as hex. Need conversion logic if HSL.
-      // For simplicity, if accent is hex, this part needs a hex-to-HSL conversion
-      // Or, store accentColor as HSL string in portfolioData.theme.
-      // For now, using the default accent values from globals.css and --custom-accent for specific overrides.
-      // The primary ShadCN theme colors (primary, accent) in globals.css are defined with HSL.
-      // The color picker should ideally output HSL to directly feed these.
-      // If color picker outputs hex, convert it to HSL for --primary, --accent etc.
-      // For now, we'll create a `--custom-accent-color` variable and use it.
-       document.documentElement.style.setProperty('--custom-accent-color', portfolioData.theme.accentColor);
+      // Apply custom accent color
+      document.documentElement.style.setProperty('--custom-accent-color', portfolioData.theme.accentColor);
+
+      // Attempt to parse HSL from the accentColor to update the theme's generic --accent variable
+      // Fallback to the default --accent HSL values from globals.css (Sunny Coral & Teal theme) if parsing fails.
+      // Default Teal: hsl(170, 60%, 45%)
+      const h = portfolioData.theme.accentColor.match(/hsl\(([^,]+),/)?.[1] || '170';
+      const s = portfolioData.theme.accentColor.match(/,\s*([^%]+)%,/)?.[1] || '60'; // just the number
+      const l = portfolioData.theme.accentColor.match(/,\s*[^%]+%,\s*([^%]+)%\)/)?.[1] || '45'; // just the number
+
+      document.documentElement.style.setProperty('--accent-h', h);
+      document.documentElement.style.setProperty('--accent-s', `${s}%`);
+      document.documentElement.style.setProperty('--accent-l', `${l}%`);
 
     }
   }, [portfolioData]);

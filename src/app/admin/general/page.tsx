@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { PortfolioData, ContactInfo } from '@/lib/portfolio-data-types';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import React, { useCallback } from 'react'; // Added useCallback
 
 export default function AdminGeneralPage() {
   const { portfolioData, updatePortfolioData, isLoading } = useAppContext();
@@ -18,20 +19,20 @@ export default function AdminGeneralPage() {
     return <AdminLayout><p>Loading general settings...</p></AdminLayout>;
   }
 
-  const handleChange = (field: keyof PortfolioData, value: string) => {
+  const handleChange = useCallback((field: keyof PortfolioData, value: string) => {
     updatePortfolioData(prev => ({ ...prev!, [field]: value }));
-  };
+  }, [updatePortfolioData]);
 
-  const handleContactChange = (field: keyof ContactInfo, value: string) => {
+  const handleContactChange = useCallback((field: keyof ContactInfo, value: string) => {
     updatePortfolioData(prev => ({
       ...prev!,
       contact: { ...prev!.contact, [field]: value },
     }));
-  };
+  }, [updatePortfolioData]);
   
-  const handleProfilePictureInitialsChange = (value: string) => {
+  const handleProfilePictureInitialsChange = useCallback((value: string) => {
     updatePortfolioData(prev => ({ ...prev!, profilePictureInitials: value.substring(0,2).toUpperCase() }));
-  };
+  }, [updatePortfolioData]);
 
 
   return (

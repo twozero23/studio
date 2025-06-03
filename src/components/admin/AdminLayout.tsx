@@ -19,6 +19,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
+import React, { useCallback } from 'react'; // Added useCallback
 
 const AdminNavLinks = [
   { href: '/admin', label: 'Dashboard Home', icon: Home },
@@ -36,30 +37,30 @@ const AdminNavLinks = [
 export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const router = useRouter();
-  const { portfolioData, resetPortfolioData } = useAppContext();
+  const { portfolioData, resetPortfolioData } = useAppContext(); // portfolioData might not be needed here directly
   const { toast } = useToast();
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = useCallback(() => {
     // Data is saved on change by usePortfolioData hook, this is more for UX feedback
     toast({
       title: "Changes Saved",
       description: "Your portfolio data has been updated in local storage.",
       variant: "default",
     });
-  };
+  }, [toast]);
   
-  const handleResetData = () => {
+  const handleResetData = useCallback(() => {
     resetPortfolioData();
     toast({
       title: "Data Reset",
       description: "Portfolio data has been reset to defaults.",
       variant: "default",
     });
-  };
+  }, [resetPortfolioData, toast]);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => { // useCallback for consistency, though not strictly necessary here
     router.push('/api/auth/logout');
-  };
+  }, [router]);
 
 
   return (

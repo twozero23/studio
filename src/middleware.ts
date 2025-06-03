@@ -6,22 +6,29 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const sessionToken = request.cookies.get('sessionToken')?.value;
 
+  // !!! DEVELOPMENT ONLY: AUTHENTICATION BYPASSED !!!
+  // TODO: Re-enable authentication checks before deploying to production.
+  // The following lines are commented out to allow unauthenticated access
+  // to /admin routes during development.
+
+  /*
   // If trying to access admin routes without authentication, redirect to login
-  // if (pathname.startsWith('/admin')) {
-  //   if (!sessionToken || sessionToken !== 'authenticated') {
-  //     const loginUrl = new URL('/login', request.url);
-  //     // Optionally, you can add a redirect query parameter if needed
-  //     // loginUrl.searchParams.set('redirectedFrom', pathname);
-  //     return NextResponse.redirect(loginUrl);
-  //   }
-  // }
+  if (pathname.startsWith('/admin')) {
+    if (!sessionToken || sessionToken !== 'authenticated') {
+      const loginUrl = new URL('/login', request.url);
+      // Optionally, you can add a redirect query parameter if needed
+      // loginUrl.searchParams.set('redirectedFrom', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
 
   // If accessing login page while already authenticated, redirect to admin dashboard
-  // if (pathname === '/login') {
-  //   if (sessionToken === 'authenticated') {
-  //     return NextResponse.redirect(new URL('/admin', request.url));
-  //   }
-  // }
+  if (pathname === '/login') {
+    if (sessionToken === 'authenticated') {
+      return NextResponse.redirect(new URL('/admin', request.url));
+    }
+  }
+  */
 
   return NextResponse.next();
 }
