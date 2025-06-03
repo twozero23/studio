@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import NextLink from 'next/link'; // Renamed to avoid conflict with LinkIcon
 import type React from 'react';
+import { cn } from '@/lib/utils';
 
 // Simplified Farcaster Icon Component
 const FarcasterIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -27,16 +28,26 @@ const POAPIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 
 interface ContactItemProps {
   icon: React.ElementType;
-  text: string;
+  text?: string; // Text is now optional
   href: string;
   ariaLabel: string;
 }
 
 const ContactItem: React.FC<ContactItemProps> = ({ icon: Icon, text, href, ariaLabel }) => (
-  <Button variant="ghost" asChild className="justify-start text-lg p-3 hover:bg-primary/10 group w-auto">
+  <Button
+    variant="ghost"
+    asChild
+    className={cn(
+      "p-3 hover:bg-primary/10 group",
+      text ? "justify-start w-auto text-lg" : "justify-center w-12 h-12 aspect-square" // Icon-only buttons are square
+    )}
+  >
     <NextLink href={href} target="_blank" rel="noopener noreferrer" aria-label={ariaLabel}>
-      <Icon className="h-5 w-5 mr-2 text-primary group-hover:scale-110 transition-transform" style={{ color: 'hsl(var(--primary))' }} />
-      <span className="text-foreground group-hover:text-primary text-sm sm:text-base">{text}</span>
+      <Icon className={cn(
+        "text-primary group-hover:scale-110 transition-transform",
+        text ? "h-5 w-5 mr-2" : "h-6 w-6" // Larger icon if no text, no right margin
+      )} style={{ color: 'hsl(var(--primary))' }} />
+      {text && <span className="text-foreground group-hover:text-primary text-sm sm:text-base">{text}</span>}
     </NextLink>
   </Button>
 );
@@ -66,7 +77,7 @@ export const ContactSection = () => {
             I'm always open to discussing new projects, creative ideas, or opportunities to be part of something transformative. Feel free to reach out!
           </p>
           <div className="flex flex-row flex-wrap justify-center items-center gap-x-4 gap-y-3">
-            <ContactItem icon={Mail} text={contact.email} href={`mailto:${contact.email}`} ariaLabel="Email Nauman Mehdi"/>
+            <ContactItem icon={Mail} href={`mailto:${contact.email}`} ariaLabel="Email Nauman Mehdi"/> {/* Text prop removed */}
             <ContactItem icon={Linkedin} text="LinkedIn" href={`https://${contact.linkedin}`} ariaLabel="Nauman Mehdi's LinkedIn Profile"/>
             {contact.github && <ContactItem icon={Github} text="GitHub" href={contact.github.startsWith('http') ? contact.github : `https://${contact.github}`} ariaLabel="Nauman Mehdi's GitHub Profile"/>}
             {contact.x && <ContactItem icon={Twitter} text="X" href={contact.x} ariaLabel="Nauman Mehdi's X Profile"/>}
