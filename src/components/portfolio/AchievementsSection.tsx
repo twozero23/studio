@@ -43,14 +43,44 @@ export const AchievementsSection = () => {
   const { achievements } = portfolioData;
 
   const parseMetric = (metric: string): number => {
-    // Remove PKR, %, commas and then parse.
-    const numericString = metric.replace(/PKR|,|\s/gi, '').replace(/%/g, '');
-    return parseFloat(numericString) || 0;
-  }
+    const lowerMetric = metric.toLowerCase();
+    
+    // If metric contains "million", "billion", "thousand", "lakh", "crore" as whole words, treat as text.
+    if (/\b(million|billion|thousand|lakh|crore)\b/i.test(lowerMetric)) {
+      return NaN;
+    }
+
+    // Standardize, remove currency symbols, commas, spaces for parsing.
+    // Keep '%' for getSuffix to handle.
+    let numStr = lowerMetric.replace(/pkr|usd|eur|gbp|,|\s/gi, '');
+    numStr = numStr.replace(/%/g, ''); // Remove percent for parsing, suffix will add it back.
+
+    let multiplier = 1;
+    if (numStr.endsWith('m')) {
+      multiplier = 1000000;
+      numStr = numStr.slice(0, -1);
+    } else if (numStr.endsWith('k')) {
+      multiplier = 1000;
+      numStr = numStr.slice(0, -1);
+    } else if (numStr.endsWith('b')) {
+      multiplier = 1000000000;
+      numStr = numStr.slice(0, -1);
+    }
+
+    const parsedValue = parseFloat(numStr);
+    
+    if (isNaN(parsedValue)) {
+      return NaN; // If after all this, it's not a number, treat as text.
+    }
+    
+    return parsedValue * multiplier;
+  };
+
 
   const getSuffix = (metric: string): string => {
     if (metric.includes('%')) return '%';
     if (metric.toLowerCase().includes('pkr')) return ' PKR';
+    // Add other currency/unit handling here if needed
     return '';
   }
 
@@ -70,11 +100,7 @@ export const AchievementsSection = () => {
           const animatedValue = parseMetric(rawMetricString);
           const suffix = getSuffix(rawMetricString);
           const prefix = getPrefix(rawMetricString);
-
-          // Condition for using AnimatedCounter:
-          // - animatedValue must be a finite number.
-          // - If animatedValue is 0, the rawMetricString should actually represent zero (e.g., "0", "0%", "0.0").
-          //   Otherwise, a 0 probably means parsing a textual metric failed.
+          
           const isTrulyZero = rawMetricString.trim().match(/^(0%?|0\.0%?)$/);
           const shouldUseAnimatedCounter = isFinite(animatedValue) && (animatedValue !== 0 || !!isTrulyZero);
 
@@ -83,7 +109,6 @@ export const AchievementsSection = () => {
               <AnimatedCounter targetValue={animatedValue} duration={2000} suffix={suffix} prefix={prefix} />
             );
           } else {
-            // If not suitable for animation, display the raw metric string
             metricContent = <>{rawMetricString}</>;
           }
           

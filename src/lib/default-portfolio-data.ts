@@ -13,9 +13,9 @@ export const defaultPortfolioData: PortfolioData = {
     linktree: 'https://linktr.ee/naumanmehdi',
     github: 'github.com/naumanmhd', // Added example github
     phone: '+923217627021', // Added example phone
-    x: '', // Initialize new field
-    farcaster: '', // Initialize new field
-    poap: '', // Initialize new field
+    x: 'https://x.com/naumanmhd', 
+    farcaster: 'https://warpcast.com/naumanmhd', 
+    poap: 'https://app.poap.xyz/user/naumanmhd.eth', 
   },
   summary:
     'Highly accomplished Product Manager with over 8 years of distinguished experience in blockchain, Web3, and digital innovation, adept at driving significant user engagement and revenue growth through strategic product development. Proven leader in delivering high-impact DeFi platforms, NFT marketplaces, and comprehensive blockchain solutions.',
@@ -182,7 +182,7 @@ export const defaultPortfolioData: PortfolioData = {
   ],
   achievements: [
     { id: 'ach1', metric: '40%', description: 'Productivity Boost at CH Fertilizers', icon: 'TrendingUp' },
-    { id: 'ach2', metric: '30.9M PKR', description: 'Profit Growth Enabled at CH Fertilizers', icon: 'DollarSign' },
+    { id: 'ach2', metric: '30 Million PKR', description: 'Profit Growth Enabled at CH Fertilizers', icon: 'DollarSign' },
     { id: 'ach3', metric: '30%', description: 'User Engagement Growth at Dan Holdings', icon: 'Users' },
     { id: 'ach4', metric: '25%', description: 'Customer Satisfaction Improvement at Dan Holdings', icon: 'Smile' },
     { id: 'ach5', metric: '20%', description: 'Market Share Increase with Block Gemini Products', icon: 'PieChart' },
@@ -225,7 +225,7 @@ export const defaultPortfolioData: PortfolioData = {
     },
   ],
   theme: {
-    accentColor: DEFAULT_ACCENT_COLOR, 
+    accentColor: '#F88A78', 
     font: DEFAULT_FONT,
     profilePictureUrl: '', 
   },
