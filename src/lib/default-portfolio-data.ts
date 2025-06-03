@@ -214,7 +214,7 @@ export const defaultPortfolioData: PortfolioData = {
     {
       id: 'edu2',
       degree: 'GCE A-Level',
-      institution: 'Beaconhouse School System',
+      institution: 'Roots College International, Islamabad',
       period: '2009 – 2011',
     },
     {
