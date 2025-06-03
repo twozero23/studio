@@ -1,6 +1,6 @@
 
 "use client";
-import React, { useState, useCallback } from 'react'; // Added useCallback
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Trash2, Edit2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,12 +25,15 @@ export function ArrayManager<T extends { id: string }>({
 
   const handleAddItem = useCallback(() => {
     const newItem = generateNewItem();
-    setItems((prevItems: T[]) => [...prevItems, newItem]);
-    setEditingIndex(items.length); // Open the new item for editing - items.length before adding new
-  }, [generateNewItem, setItems, items.length]);
+    // Ensure items is an array before spreading
+    setItems((prevItems: T[] = []) => [...prevItems, newItem]);
+    // items.length might be incorrect here if prevItems was [] due to async nature.
+    // Calculate length based on what it will be *after* adding.
+    setEditingIndex((prevItems: T[] = []) => prevItems.length); 
+  }, [generateNewItem, setItems]);
 
   const handleRemoveItem = useCallback((index: number) => {
-    setItems((prevItems: T[]) => prevItems.filter((_, i) => i !== index));
+    setItems((prevItems: T[] = []) => prevItems.filter((_, i) => i !== index));
     setEditingIndex(currentEditingIndex => {
       if (currentEditingIndex === index) {
         return null;
@@ -42,7 +45,7 @@ export function ArrayManager<T extends { id: string }>({
   }, [setItems]);
 
   const handleItemChange = useCallback((index: number, updatedItem: Partial<T>) => {
-    setItems((prevItems: T[]) => {
+    setItems((prevItems: T[] = []) => {
       const newItems = [...prevItems];
       newItems[index] = { ...newItems[index], ...updatedItem };
       return newItems;
@@ -50,7 +53,8 @@ export function ArrayManager<T extends { id: string }>({
   }, [setItems]);
   
   const handleMoveItem = useCallback((index: number, direction: 'up' | 'down') => {
-    setItems((prevItems: T[]) => {
+    setItems((prevItems: T[] = []) => {
+      if (!prevItems || prevItems.length === 0) return []; // Should not happen if items prop is guarded
       if (direction === 'up' && index === 0) return prevItems;
       if (direction === 'down' && index === prevItems.length - 1) return prevItems;
 
@@ -79,7 +83,7 @@ export function ArrayManager<T extends { id: string }>({
 
   return (
     <div className="space-y-4">
-      {items.map((item, index) => (
+      {(items || []).map((item, index) => ( // Defensive check: (items || [])
         <Card key={item.id} className="overflow-hidden">
           <CardContent className="p-4">
             <div className="flex justify-between items-center mb-2">
@@ -94,7 +98,7 @@ export function ArrayManager<T extends { id: string }>({
                 <Button variant="ghost" size="icon" onClick={() => handleMoveItem(index, 'up')} disabled={index === 0} aria-label="Move up">
                   <ChevronUp className="h-4 w-4" />
                 </Button>
-                 <Button variant="ghost" size="icon" onClick={() => handleMoveItem(index, 'down')} disabled={index === items.length - 1} aria-label="Move down">
+                 <Button variant="ghost" size="icon" onClick={() => handleMoveItem(index, 'down')} disabled={index === (items || []).length - 1} aria-label="Move down">
                   <ChevronDown className="h-4 w-4" />
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setEditingIndex(editingIndex === index ? null : index)}>
@@ -128,19 +132,19 @@ interface StringListManagerProps {
 }
 
 const StringListManagerInternal: React.FC<StringListManagerProps> = ({ list, setList, label }) => {
-  const handleAddString = useCallback(() => setList([...list, '']), [list, setList]);
+  const handleAddString = useCallback(() => setList([...(list || []), '']), [list, setList]);
   
-  const handleRemoveString = useCallback((index: number) => setList(list.filter((_, i) => i !== index)), [list, setList]);
+  const handleRemoveString = useCallback((index: number) => setList((list || []).filter((_, i) => i !== index)), [list, setList]);
   
   const handleStringChange = useCallback((index: number, value: string) => {
-    const newList = [...list];
+    const newList = [...(list || [])];
     newList[index] = value;
     setList(newList);
   }, [list, setList]);
 
   return (
     <div className="space-y-2">
-      {list.map((str, index) => (
+      {(list || []).map((str, index) => ( // Defensive check
         <div key={index} className="flex items-center gap-2">
           <Input
             type="text"
@@ -164,3 +168,4 @@ export const StringListManager = React.memo(StringListManagerInternal);
 
 // Re-exporting Input to avoid direct import of shadcn/ui/input in multiple admin pages
 import { Input } from '@/components/ui/input';
+
