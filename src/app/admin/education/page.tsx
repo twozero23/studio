@@ -12,10 +12,7 @@ export default function AdminEducationPage() {
   const { portfolioData, updatePortfolioData, isLoading } = useAppContext();
 
   const setEducation = useCallback((newEducation: EducationEntry[]) => {
-    updatePortfolioData(prev => {
-      if (!prev) return { ...prev!, education: newEducation }; // Should not happen if isLoading handled
-      return { ...prev, education: newEducation };
-    });
+    updatePortfolioData(prev => ({ ...prev, education: newEducation }));
   }, [updatePortfolioData]);
 
   const renderEducationItem = useCallback((

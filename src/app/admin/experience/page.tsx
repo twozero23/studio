@@ -13,10 +13,7 @@ export default function AdminExperiencePage() {
   const { portfolioData, updatePortfolioData, isLoading } = useAppContext();
 
   const setExperience = useCallback((newExperience: ExperienceEntry[]) => {
-    updatePortfolioData(prev => {
-      if (!prev) return { ...prev!, experience: newExperience };
-      return { ...prev, experience: newExperience };
-    });
+    updatePortfolioData(prev => ({ ...prev, experience: newExperience }));
   }, [updatePortfolioData]);
 
   const renderExperienceItem = useCallback((

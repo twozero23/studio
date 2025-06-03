@@ -29,10 +29,7 @@ export default function AdminAchievementsPage() {
   const { portfolioData, updatePortfolioData, isLoading } = useAppContext();
 
   const setAchievements = useCallback((newAchievements: AchievementHighlight[]) => {
-    updatePortfolioData(prev => {
-      if (!prev) return { ...prev!, achievements: newAchievements };
-      return { ...prev, achievements: newAchievements };
-    });
+    updatePortfolioData(prev => ({ ...prev, achievements: newAchievements }));
   }, [updatePortfolioData]);
 
   const renderAchievementItem = useCallback((

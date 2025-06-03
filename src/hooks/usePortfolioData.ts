@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import type { PortfolioData, PortfolioTheme, FontOption } from '@/lib/portfolio-data-types';
+import type { PortfolioData, PortfolioTheme } from '@/lib/portfolio-data-types';
 import { defaultPortfolioData } from '@/lib/default-portfolio-data';
 
 const LOCAL_STORAGE_KEY = 'portfolioData';
@@ -16,7 +16,6 @@ export const usePortfolioData = () => {
       const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (storedData) {
         const parsedData = JSON.parse(storedData) as PortfolioData;
-        // Ensure theme object and its properties exist
         const validatedTheme: PortfolioTheme = {
           accentColor: parsedData.theme?.accentColor || defaultPortfolioData.theme.accentColor,
           font: parsedData.theme?.font || defaultPortfolioData.theme.font,
@@ -35,34 +34,54 @@ export const usePortfolioData = () => {
     }
   }, []);
 
-  const updatePortfolioData = useCallback((newData: Partial<PortfolioData> | ((prevData: PortfolioData) => PortfolioData)) => {
-    setPortfolioData(prevData => {
-      if (!prevData) return null; // Should not happen if isLoading is handled
-      const updatedData = typeof newData === 'function' ? newData(prevData) : { ...prevData, ...newData };
-      try {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedData));
-      } catch (error) {
-        console.error("Failed to save portfolio data to localStorage:", error);
-      }
-      return updatedData;
-    });
-  }, []);
+  const updatePortfolioData = useCallback(
+    (newDataOrFn: Partial<PortfolioData> | ((prevData: PortfolioData) => PortfolioData)) => {
+      setPortfolioData(currentInternalState => {
+        const baseData = currentInternalState ?? defaultPortfolioData;
+        let newCalculatedState: PortfolioData;
+
+        if (typeof newDataOrFn === 'function') {
+          newCalculatedState = newDataOrFn(baseData);
+        } else {
+          newCalculatedState = { ...baseData, ...newDataOrFn };
+        }
+
+        try {
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newCalculatedState));
+        } catch (error) {
+          console.error("Failed to save portfolio data to localStorage:", error);
+        }
+        return newCalculatedState;
+      });
+    },
+    []
+  );
   
-  const updateTheme = useCallback((newTheme: Partial<PortfolioTheme> | ((prevTheme: PortfolioTheme) => PortfolioTheme)) => {
-    setPortfolioData(prevData => {
-      if (!prevData) return null;
-      const currentTheme = prevData.theme || defaultPortfolioData.theme;
-      const updatedThemeObject = typeof newTheme === 'function' ? newTheme(currentTheme) : { ...currentTheme, ...newTheme };
-      
-      const updatedData = { ...prevData, theme: updatedThemeObject };
-      try {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedData));
-      } catch (error) {
-        console.error("Failed to save theme data to localStorage:", error);
-      }
-      return updatedData;
-    });
-  }, []);
+  const updateTheme = useCallback(
+    (newThemeOrFn: Partial<PortfolioTheme> | ((prevTheme: PortfolioTheme) => PortfolioTheme)) => {
+      setPortfolioData(currentInternalState => {
+        const basePortfolioData = currentInternalState ?? defaultPortfolioData;
+        const baseTheme = basePortfolioData.theme; 
+
+        let newCalculatedTheme: PortfolioTheme;
+        if (typeof newThemeOrFn === 'function') {
+          newCalculatedTheme = newThemeOrFn(baseTheme);
+        } else {
+          newCalculatedTheme = { ...baseTheme, ...newThemeOrFn };
+        }
+
+        const newPortfolioState = { ...basePortfolioData, theme: newCalculatedTheme };
+        
+        try {
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newPortfolioState));
+        } catch (error) {
+          console.error("Failed to save theme data to localStorage:", error);
+        }
+        return newPortfolioState;
+      });
+    },
+    []
+  );
 
   const resetPortfolioData = useCallback(() => {
     localStorage.removeItem(LOCAL_STORAGE_KEY);

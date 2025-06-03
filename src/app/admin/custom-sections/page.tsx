@@ -3,7 +3,7 @@
 import React, { useCallback } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
-import { ArrayManager } from '@/components/admin/ArrayManager'; // StringListManager removed as it's part of ArrayManager file
+import { ArrayManager } from '@/components/admin/ArrayManager'; 
 import { FormFieldComponent as FormField } from '@/components/admin/FormField';
 import { useAppContext } from '@/components/AppProviders';
 import type { CustomSectionEntry, CustomField } from '@/lib/portfolio-data-types';
@@ -16,10 +16,7 @@ export default function AdminCustomSectionsPage() {
   const { portfolioData, updatePortfolioData, isLoading } = useAppContext();
 
   const setCustomSections = useCallback((newSections: CustomSectionEntry[]) => {
-    updatePortfolioData(prev => {
-      if (!prev) return { ...prev!, customSections: newSections };
-      return { ...prev, customSections: newSections };
-    });
+    updatePortfolioData(prev => ({ ...prev, customSections: newSections }));
   }, [updatePortfolioData]);
 
   const renderCustomField = useCallback((
@@ -60,7 +57,7 @@ export default function AdminCustomSectionsPage() {
     };
 
     const handleFieldChange = (fieldIndex: number, updatedField: Partial<CustomField>) => {
-      const updatedItems = [...(item.items || [])]; // Ensure items is an array
+      const updatedItems = [...(item.items || [])]; 
       updatedItems[fieldIndex] = { ...updatedItems[fieldIndex], ...updatedField };
       onChange(index, { items: updatedItems });
     };

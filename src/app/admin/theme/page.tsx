@@ -10,25 +10,29 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AVAILABLE_FONTS, DEFAULT_FONT, DEFAULT_ACCENT_COLOR } from '@/lib/portfolio-data-types';
 import type { PortfolioTheme, FontOption } from '@/lib/portfolio-data-types';
+import React, { useCallback } from 'react'; // Import useCallback
 
 export default function AdminThemePage() {
   const { portfolioData, updateTheme, isLoading, currentFont, currentAccentColor } = useAppContext();
+  
+  // Moved hook calls to the top
+  const handleThemeChange = useCallback((field: keyof PortfolioTheme, value: string) => {
+    updateTheme(prevTheme => ({ ...prevTheme, [field]: value }));
+  }, [updateTheme]);
+
+  const handleResetAccentColor = useCallback(() => {
+    handleThemeChange('accentColor', DEFAULT_ACCENT_COLOR);
+  }, [handleThemeChange]);
+  
+  const handleResetFont = useCallback(() => {
+    handleThemeChange('font', DEFAULT_FONT);
+  }, [handleThemeChange]);
+
 
   if (isLoading || !portfolioData) {
     return <AdminLayout><p>Loading theme settings...</p></AdminLayout>;
   }
 
-  const handleThemeChange = (field: keyof PortfolioTheme, value: string) => {
-    updateTheme(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleResetAccentColor = () => {
-    handleThemeChange('accentColor', DEFAULT_ACCENT_COLOR);
-  };
-  
-  const handleResetFont = () => {
-    handleThemeChange('font', DEFAULT_FONT);
-  };
 
   return (
     <AdminLayout>

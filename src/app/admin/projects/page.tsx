@@ -13,10 +13,7 @@ export default function AdminProjectsPage() {
   const { portfolioData, updatePortfolioData, isLoading } = useAppContext();
 
   const setProjects = useCallback((newProjects: ProjectEntry[]) => {
-    updatePortfolioData(prev => {
-      if (!prev) return { ...prev!, projects: newProjects };
-      return { ...prev, projects: newProjects };
-    });
+    updatePortfolioData(prev => ({ ...prev, projects: newProjects }));
   }, [updatePortfolioData]);
 
   const renderProjectItem = useCallback((

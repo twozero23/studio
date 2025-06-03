@@ -4,36 +4,30 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
 import { FormFieldComponent as FormField } from '@/components/admin/FormField';
 import { useAppContext } from '@/components/AppProviders';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 import type { PortfolioData, ContactInfo } from '@/lib/portfolio-data-types';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import React, { useCallback } from 'react'; // Added useCallback
+import React, { useCallback } from 'react'; 
 
 export default function AdminGeneralPage() {
   const { portfolioData, updatePortfolioData, isLoading } = useAppContext();
-  const { toast } = useToast();
-
-  if (isLoading || !portfolioData) {
-    return <AdminLayout><p>Loading general settings...</p></AdminLayout>;
-  }
 
   const handleChange = useCallback((field: keyof PortfolioData, value: string) => {
-    updatePortfolioData(prev => ({ ...prev!, [field]: value }));
+    updatePortfolioData(prev => ({ ...prev, [field]: value }));
   }, [updatePortfolioData]);
 
   const handleContactChange = useCallback((field: keyof ContactInfo, value: string) => {
     updatePortfolioData(prev => ({
-      ...prev!,
-      contact: { ...prev!.contact, [field]: value },
+      ...prev,
+      contact: { ...prev.contact, [field]: value },
     }));
   }, [updatePortfolioData]);
   
   const handleProfilePictureInitialsChange = useCallback((value: string) => {
-    updatePortfolioData(prev => ({ ...prev!, profilePictureInitials: value.substring(0,2).toUpperCase() }));
+    updatePortfolioData(prev => ({ ...prev, profilePictureInitials: value.substring(0,2).toUpperCase() }));
   }, [updatePortfolioData]);
 
+  if (isLoading || !portfolioData) {
+    return <AdminLayout><p>Loading general settings...</p></AdminLayout>;
+  }
 
   return (
     <AdminLayout>

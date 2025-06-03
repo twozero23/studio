@@ -21,23 +21,13 @@ export default function AdminSkillsPage() {
   const { portfolioData, updatePortfolioData, isLoading } = useAppContext();
 
   const setSkills = useCallback((skillType: 'technical' | 'tools' | 'soft', newSkills: Skill[]) => {
-    updatePortfolioData(prev => {
-      if (!prev || !prev.skills) return { 
-        ...prev!, 
-        skills: { 
-          technical: skillType === 'technical' ? newSkills : (prev?.skills?.technical || []), 
-          tools: skillType === 'tools' ? newSkills : (prev?.skills?.tools || []), 
-          soft: skillType === 'soft' ? newSkills : (prev?.skills?.soft || []), 
-        } 
-      };
-      return {
-        ...prev,
-        skills: {
-          ...prev.skills,
-          [skillType]: newSkills,
-        },
-      };
-    });
+    updatePortfolioData(prev => ({
+      ...prev,
+      skills: {
+        ...prev.skills,
+        [skillType]: newSkills,
+      },
+    }));
   }, [updatePortfolioData]);
 
   const renderTechnicalSkillItem = useCallback((
@@ -95,7 +85,6 @@ export default function AdminSkillsPage() {
     return <AdminLayout><p>Loading skills editor...</p></AdminLayout>;
   }
   
-  // Ensure portfolioData.skills exists for ArrayManager
   const technicalSkills = portfolioData.skills?.technical || [];
   const toolSkills = portfolioData.skills?.tools || [];
   const softSkills = portfolioData.skills?.soft || [];

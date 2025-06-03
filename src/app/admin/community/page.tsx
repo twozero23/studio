@@ -12,17 +12,11 @@ export default function AdminCommunityCertsPage() {
   const { portfolioData, updatePortfolioData, isLoading } = useAppContext();
 
   const setCommunityInvolvement = useCallback((newEntries: CommunityEntry[]) => {
-    updatePortfolioData(prev => {
-      if (!prev) return { ...prev!, communityInvolvement: newEntries };
-      return { ...prev, communityInvolvement: newEntries };
-    });
+    updatePortfolioData(prev => ({ ...prev, communityInvolvement: newEntries }));
   }, [updatePortfolioData]);
 
   const setCertifications = useCallback((newEntries: CertificationEntry[]) => {
-    updatePortfolioData(prev => {
-      if (!prev) return { ...prev!, certifications: newEntries };
-      return { ...prev, certifications: newEntries };
-    });
+    updatePortfolioData(prev => ({ ...prev, certifications: newEntries }));
   }, [updatePortfolioData]);
 
   const renderCommunityItem = useCallback((
