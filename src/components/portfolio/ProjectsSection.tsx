@@ -18,7 +18,7 @@ export const ProjectsSection = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 animate-pulse">
           {[1, 2, 3].map(i => (
             <Card key={i}>
-              <div className="h-40 bg-muted rounded-t-lg"></div>
+              {/* Image placeholder removed from skeleton */}
               <CardHeader>
                 <div className="h-6 bg-muted rounded w-3/4 mb-2"></div>
                 <div className="h-4 bg-muted rounded w-1/2"></div>
@@ -41,15 +41,7 @@ export const ProjectsSection = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {projects.map(project => (
           <Card key={project.id} className="flex flex-col shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-            {project.imageUrl ? (
-               <div className="w-full h-48 relative">
-                <Image src={project.imageUrl} alt={project.name} layout="fill" objectFit="cover" data-ai-hint="project technology"/>
-               </div>
-            ) : (
-              <div className="w-full h-48 bg-muted flex items-center justify-center" data-ai-hint="abstract technology">
-                <Cpu className="w-16 h-16 text-primary opacity-50" style={{ color: 'hsl(var(--primary))' }} />
-              </div>
-            )}
+            {/* Image and placeholder rendering removed */}
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-primary" style={{ color: 'hsl(var(--primary))' }}>{project.name}</CardTitle>
               <CardDescription className="text-sm text-muted-foreground italic">Role: {project.role}</CardDescription>
