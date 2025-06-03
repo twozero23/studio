@@ -1,6 +1,6 @@
 
 "use client";
-import React, { useCallback } from 'react'; // Added useCallback
+import React, { useCallback } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
 import { ArrayManager, StringListManager } from '@/components/admin/ArrayManager';
@@ -12,13 +12,12 @@ import { Label } from '@/components/ui/label';
 export default function AdminExperiencePage() {
   const { portfolioData, updatePortfolioData, isLoading } = useAppContext();
 
-  if (isLoading || !portfolioData) {
-    return <AdminLayout><p>Loading experience editor...</p></AdminLayout>;
-  }
-
-  const setExperience = (newExperience: ExperienceEntry[]) => {
-    updatePortfolioData(prev => ({ ...prev!, experience: newExperience }));
-  };
+  const setExperience = useCallback((newExperience: ExperienceEntry[]) => {
+    updatePortfolioData(prev => {
+      if (!prev) return { ...prev!, experience: newExperience };
+      return { ...prev, experience: newExperience };
+    });
+  }, [updatePortfolioData]);
 
   const renderExperienceItem = useCallback((
     item: ExperienceEntry,
@@ -39,7 +38,7 @@ export default function AdminExperiencePage() {
         <div>
           <Label className="font-medium">Responsibilities</Label>
           <StringListManager
-            list={item.responsibilities}
+            list={item.responsibilities || []}
             setList={(newList) => handleChange('responsibilities', newList)}
             label="Responsibility"
           />
@@ -47,7 +46,7 @@ export default function AdminExperiencePage() {
         <div>
           <Label className="font-medium">Achievements</Label>
           <StringListManager
-            list={item.achievements}
+            list={item.achievements || []}
             setList={(newList) => handleChange('achievements', newList)}
             label="Achievement"
           />
@@ -66,6 +65,10 @@ export default function AdminExperiencePage() {
     achievements: [],
   }), []);
 
+  if (isLoading || !portfolioData) {
+    return <AdminLayout><p>Loading experience editor...</p></AdminLayout>;
+  }
+
   return (
     <AdminLayout>
       <EditableSectionWrapper
@@ -73,7 +76,7 @@ export default function AdminExperiencePage() {
         description="Manage your professional roles and responsibilities."
       >
         <ArrayManager
-          items={portfolioData.experience}
+          items={portfolioData.experience || []}
           setItems={setExperience}
           renderItem={renderExperienceItem}
           generateNewItem={generateNewExperienceItem}

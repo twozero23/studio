@@ -1,6 +1,6 @@
 
 "use client";
-import React, { useCallback } from 'react'; // Added useCallback
+import React, { useCallback } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
 import { ArrayManager, StringListManager } from '@/components/admin/ArrayManager';
@@ -12,13 +12,12 @@ import { Label } from '@/components/ui/label';
 export default function AdminProjectsPage() {
   const { portfolioData, updatePortfolioData, isLoading } = useAppContext();
 
-  if (isLoading || !portfolioData) {
-    return <AdminLayout><p>Loading projects editor...</p></AdminLayout>;
-  }
-
-  const setProjects = (newProjects: ProjectEntry[]) => {
-    updatePortfolioData(prev => ({ ...prev!, projects: newProjects }));
-  };
+  const setProjects = useCallback((newProjects: ProjectEntry[]) => {
+    updatePortfolioData(prev => {
+      if (!prev) return { ...prev!, projects: newProjects };
+      return { ...prev, projects: newProjects };
+    });
+  }, [updatePortfolioData]);
 
   const renderProjectItem = useCallback((
     item: ProjectEntry,
@@ -40,7 +39,7 @@ export default function AdminProjectsPage() {
         <div>
           <Label className="font-medium">Highlights</Label>
           <StringListManager
-            list={item.highlights}
+            list={item.highlights || []}
             setList={(newList) => handleChange('highlights', newList)}
             label="Highlight"
           />
@@ -68,6 +67,10 @@ export default function AdminProjectsPage() {
     projectUrl: '',
   }), []);
 
+  if (isLoading || !portfolioData) {
+    return <AdminLayout><p>Loading projects editor...</p></AdminLayout>;
+  }
+
   return (
     <AdminLayout>
       <EditableSectionWrapper
@@ -75,7 +78,7 @@ export default function AdminProjectsPage() {
         description="Manage the projects you want to highlight in your portfolio."
       >
         <ArrayManager
-          items={portfolioData.projects}
+          items={portfolioData.projects || []}
           setItems={setProjects}
           renderItem={renderProjectItem}
           generateNewItem={generateNewProjectItem}

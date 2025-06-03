@@ -1,6 +1,6 @@
 
 "use client";
-import React, { useCallback } from 'react'; // Added useCallback
+import React, { useCallback } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
 import { ArrayManager } from '@/components/admin/ArrayManager';
@@ -23,18 +23,17 @@ const ICON_OPTIONS = [
   { value: 'ShieldCheck', label: 'Shield Check (Security/QA)', icon: ShieldCheck },
 ];
 
-const NO_ICON_VALUE = "_NONE_"; // Special value for "No Icon"
+const NO_ICON_VALUE = "_NONE_";
 
 export default function AdminAchievementsPage() {
   const { portfolioData, updatePortfolioData, isLoading } = useAppContext();
 
-  if (isLoading || !portfolioData) {
-    return <AdminLayout><p>Loading achievements editor...</p></AdminLayout>;
-  }
-
-  const setAchievements = (newAchievements: AchievementHighlight[]) => {
-    updatePortfolioData(prev => ({ ...prev!, achievements: newAchievements }));
-  };
+  const setAchievements = useCallback((newAchievements: AchievementHighlight[]) => {
+    updatePortfolioData(prev => {
+      if (!prev) return { ...prev!, achievements: newAchievements };
+      return { ...prev, achievements: newAchievements };
+    });
+  }, [updatePortfolioData]);
 
   const renderAchievementItem = useCallback((
     item: AchievementHighlight,
@@ -77,7 +76,7 @@ export default function AdminAchievementsPage() {
         </div>
       </div>
     );
-  }, []); // ICON_OPTIONS and NO_ICON_VALUE are module-level constants
+  }, []);
 
   const generateNewAchievementItem = useCallback(() => ({
     id: `ach-${Date.now()}`,
@@ -86,6 +85,10 @@ export default function AdminAchievementsPage() {
     icon: 'Award', 
   }), []);
 
+  if (isLoading || !portfolioData) {
+    return <AdminLayout><p>Loading achievements editor...</p></AdminLayout>;
+  }
+
   return (
     <AdminLayout>
       <EditableSectionWrapper
@@ -93,7 +96,7 @@ export default function AdminAchievementsPage() {
         description="Showcase your key quantifiable achievements."
       >
         <ArrayManager
-          items={portfolioData.achievements}
+          items={portfolioData.achievements || []}
           setItems={setAchievements}
           renderItem={renderAchievementItem}
           generateNewItem={generateNewAchievementItem}

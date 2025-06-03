@@ -1,9 +1,9 @@
 
 "use client";
-import React, { useCallback } from 'react'; // Added useCallback
+import React, { useCallback } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
-import { ArrayManager, StringListManager } from '@/components/admin/ArrayManager';
+import { ArrayManager } from '@/components/admin/ArrayManager'; // StringListManager removed as it's part of ArrayManager file
 import { FormFieldComponent as FormField } from '@/components/admin/FormField';
 import { useAppContext } from '@/components/AppProviders';
 import type { CustomSectionEntry, CustomField } from '@/lib/portfolio-data-types';
@@ -15,16 +15,15 @@ import { PlusCircle, Trash2 } from 'lucide-react';
 export default function AdminCustomSectionsPage() {
   const { portfolioData, updatePortfolioData, isLoading } = useAppContext();
 
-  if (isLoading || !portfolioData) {
-    return <AdminLayout><p>Loading custom sections editor...</p></AdminLayout>;
-  }
-
-  const setCustomSections = (newSections: CustomSectionEntry[]) => {
-    updatePortfolioData(prev => ({ ...prev!, customSections: newSections }));
-  };
+  const setCustomSections = useCallback((newSections: CustomSectionEntry[]) => {
+    updatePortfolioData(prev => {
+      if (!prev) return { ...prev!, customSections: newSections };
+      return { ...prev, customSections: newSections };
+    });
+  }, [updatePortfolioData]);
 
   const renderCustomField = useCallback((
-    sectionIndex: number, // Not directly used but part of a closure if this was memoized independently
+    sectionIndex: number,
     field: CustomField,
     fieldIndex: number,
     onFieldChange: (sectionIndex: number, fieldIndex: number, updatedField: Partial<CustomField>) => void,
@@ -51,7 +50,6 @@ export default function AdminCustomSectionsPage() {
     </div>
   ), []);
 
-
   const renderCustomSectionItem = useCallback((
     item: CustomSectionEntry,
     index: number,
@@ -62,18 +60,18 @@ export default function AdminCustomSectionsPage() {
     };
 
     const handleFieldChange = (fieldIndex: number, updatedField: Partial<CustomField>) => {
-      const updatedItems = [...item.items];
+      const updatedItems = [...(item.items || [])]; // Ensure items is an array
       updatedItems[fieldIndex] = { ...updatedItems[fieldIndex], ...updatedField };
       onChange(index, { items: updatedItems });
     };
 
     const handleAddField = () => {
       const newField: CustomField = { id: `field-${Date.now()}`, key: '', value: '' };
-      onChange(index, { items: [...item.items, newField] });
+      onChange(index, { items: [...(item.items || []), newField] });
     };
 
     const handleRemoveField = (fieldIndex: number) => {
-      const filteredItems = item.items.filter((_, idx) => idx !== fieldIndex);
+      const filteredItems = (item.items || []).filter((_, idx) => idx !== fieldIndex);
       onChange(index, { items: filteredItems });
     };
 
@@ -89,26 +87,30 @@ export default function AdminCustomSectionsPage() {
         <div>
           <Label className="font-medium mb-2 block">Fields in this section:</Label>
           <div className="space-y-3">
-            {item.items.map((field, fieldIndex) =>
+            {(item.items || []).map((field, fieldIndex) =>
               renderCustomField(index, field, fieldIndex, 
                 (_sIdx, fIdx, uField) => handleFieldChange(fIdx, uField), 
                 (_sIdx, fIdx) => handleRemoveField(fIdx)
               )
             )}
           </div>
-          <Button type="button" variant="outline" size="sm" onClick={() => handleAddField()} className="mt-3">
+          <Button type="button" variant="outline" size="sm" onClick={handleAddField} className="mt-3">
             <PlusCircle className="h-4 w-4 mr-2" /> Add Field to this Section
           </Button>
         </div>
       </div>
     );
-  }, [renderCustomField]); // renderCustomField is memoized
+  }, [renderCustomField]);
 
   const generateNewCustomSectionItem = useCallback(() => ({
     id: `custom-section-${Date.now()}`,
     title: '',
     items: [{ id: `field-${Date.now()}`, key: '', value: '' }],
   }), []);
+  
+  if (isLoading || !portfolioData) {
+    return <AdminLayout><p>Loading custom sections editor...</p></AdminLayout>;
+  }
 
   return (
     <AdminLayout>

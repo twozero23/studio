@@ -1,6 +1,6 @@
 
 "use client";
-import React, { useCallback } from 'react'; // Added useCallback
+import React, { useCallback } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
 import { ArrayManager } from '@/components/admin/ArrayManager';
@@ -11,17 +11,19 @@ import type { CommunityEntry, CertificationEntry } from '@/lib/portfolio-data-ty
 export default function AdminCommunityCertsPage() {
   const { portfolioData, updatePortfolioData, isLoading } = useAppContext();
 
-  if (isLoading || !portfolioData) {
-    return <AdminLayout><p>Loading editor...</p></AdminLayout>;
-  }
+  const setCommunityInvolvement = useCallback((newEntries: CommunityEntry[]) => {
+    updatePortfolioData(prev => {
+      if (!prev) return { ...prev!, communityInvolvement: newEntries };
+      return { ...prev, communityInvolvement: newEntries };
+    });
+  }, [updatePortfolioData]);
 
-  const setCommunityInvolvement = (newEntries: CommunityEntry[]) => {
-    updatePortfolioData(prev => ({ ...prev!, communityInvolvement: newEntries }));
-  };
-
-  const setCertifications = (newEntries: CertificationEntry[]) => {
-    updatePortfolioData(prev => ({ ...prev!, certifications: newEntries }));
-  };
+  const setCertifications = useCallback((newEntries: CertificationEntry[]) => {
+    updatePortfolioData(prev => {
+      if (!prev) return { ...prev!, certifications: newEntries };
+      return { ...prev, certifications: newEntries };
+    });
+  }, [updatePortfolioData]);
 
   const renderCommunityItem = useCallback((
     item: CommunityEntry,
@@ -50,6 +52,10 @@ export default function AdminCommunityCertsPage() {
   
   const generateNewCertificationItem = useCallback(() => ({ id: `cert-${Date.now()}`, name: '', issuer: '', date: '' }), []);
 
+  if (isLoading || !portfolioData) {
+    return <AdminLayout><p>Loading editor...</p></AdminLayout>;
+  }
+
   return (
     <AdminLayout>
       <EditableSectionWrapper
@@ -59,7 +65,7 @@ export default function AdminCommunityCertsPage() {
         <div>
           <h3 className="text-xl font-semibold mb-3">Community Involvement</h3>
           <ArrayManager
-            items={portfolioData.communityInvolvement}
+            items={portfolioData.communityInvolvement || []}
             setItems={setCommunityInvolvement}
             renderItem={renderCommunityItem}
             generateNewItem={generateNewCommunityItem}
@@ -69,7 +75,7 @@ export default function AdminCommunityCertsPage() {
         <div className="mt-8">
           <h3 className="text-xl font-semibold mb-3">Certifications</h3>
           <ArrayManager
-            items={portfolioData.certifications}
+            items={portfolioData.certifications || []}
             setItems={setCertifications}
             renderItem={renderCertificationItem}
             generateNewItem={generateNewCertificationItem}

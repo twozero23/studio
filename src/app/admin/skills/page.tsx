@@ -1,6 +1,6 @@
 
 "use client";
-import React, { useCallback } from 'react'; // Added useCallback
+import React, { useCallback } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
 import { ArrayManager } from '@/components/admin/ArrayManager';
@@ -20,19 +20,25 @@ const SKILL_CATEGORIES = [
 export default function AdminSkillsPage() {
   const { portfolioData, updatePortfolioData, isLoading } = useAppContext();
 
-  if (isLoading || !portfolioData) {
-    return <AdminLayout><p>Loading skills editor...</p></AdminLayout>;
-  }
-
-  const setSkills = (skillType: 'technical' | 'tools' | 'soft', newSkills: Skill[]) => {
-    updatePortfolioData(prev => ({
-      ...prev!,
-      skills: {
-        ...prev!.skills,
-        [skillType]: newSkills,
-      },
-    }));
-  };
+  const setSkills = useCallback((skillType: 'technical' | 'tools' | 'soft', newSkills: Skill[]) => {
+    updatePortfolioData(prev => {
+      if (!prev || !prev.skills) return { 
+        ...prev!, 
+        skills: { 
+          technical: skillType === 'technical' ? newSkills : (prev?.skills?.technical || []), 
+          tools: skillType === 'tools' ? newSkills : (prev?.skills?.tools || []), 
+          soft: skillType === 'soft' ? newSkills : (prev?.skills?.soft || []), 
+        } 
+      };
+      return {
+        ...prev,
+        skills: {
+          ...prev.skills,
+          [skillType]: newSkills,
+        },
+      };
+    });
+  }, [updatePortfolioData]);
 
   const renderTechnicalSkillItem = useCallback((
     item: Skill,
@@ -63,10 +69,10 @@ export default function AdminSkillsPage() {
         </div>
       </div>
     );
-  }, []); // SKILL_CATEGORIES is a module-level constant
+  }, []);
 
   const renderGenericSkillItem = useCallback((
-    skillType: 'tools' | 'soft', // To help generate unique IDs
+    skillType: 'tools' | 'soft',
     item: Skill,
     index: number,
     onChange: (index: number, updatedItem: Partial<Skill>) => void
@@ -85,6 +91,15 @@ export default function AdminSkillsPage() {
   const generateNewToolSkill = useCallback(() => ({ id: `toolskill-${Date.now()}`, name: '' }), []);
   const generateNewSoftSkill = useCallback(() => ({ id: `softskill-${Date.now()}`, name: '' }), []);
 
+  if (isLoading || !portfolioData) {
+    return <AdminLayout><p>Loading skills editor...</p></AdminLayout>;
+  }
+  
+  // Ensure portfolioData.skills exists for ArrayManager
+  const technicalSkills = portfolioData.skills?.technical || [];
+  const toolSkills = portfolioData.skills?.tools || [];
+  const softSkills = portfolioData.skills?.soft || [];
+
   return (
     <AdminLayout>
       <EditableSectionWrapper
@@ -94,7 +109,7 @@ export default function AdminSkillsPage() {
         <div>
           <h3 className="text-xl font-semibold mb-3">Technical Skills</h3>
           <ArrayManager
-            items={portfolioData.skills.technical}
+            items={technicalSkills}
             setItems={(newSkills) => setSkills('technical', newSkills)}
             renderItem={renderTechnicalSkillItem}
             generateNewItem={generateNewTechnicalSkill}
@@ -104,7 +119,7 @@ export default function AdminSkillsPage() {
         <div className="mt-8">
           <h3 className="text-xl font-semibold mb-3">Technical Tools</h3>
           <ArrayManager
-            items={portfolioData.skills.tools}
+            items={toolSkills}
             setItems={(newSkills) => setSkills('tools', newSkills)}
             renderItem={(item, index, onChange) => renderGenericSkillItem('tools', item, index, onChange)}
             generateNewItem={generateNewToolSkill}
@@ -114,7 +129,7 @@ export default function AdminSkillsPage() {
         <div className="mt-8">
           <h3 className="text-xl font-semibold mb-3">Soft Skills</h3>
           <ArrayManager
-            items={portfolioData.skills.soft}
+            items={softSkills}
             setItems={(newSkills) => setSkills('soft', newSkills)}
             renderItem={(item, index, onChange) => renderGenericSkillItem('soft', item, index, onChange)}
             generateNewItem={generateNewSoftSkill}

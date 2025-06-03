@@ -1,6 +1,6 @@
 
 "use client";
-import React, { useCallback } from 'react'; // Added useCallback
+import React, { useCallback } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
 import { ArrayManager } from '@/components/admin/ArrayManager';
@@ -11,13 +11,12 @@ import type { EducationEntry } from '@/lib/portfolio-data-types';
 export default function AdminEducationPage() {
   const { portfolioData, updatePortfolioData, isLoading } = useAppContext();
 
-  if (isLoading || !portfolioData) {
-    return <AdminLayout><p>Loading education editor...</p></AdminLayout>;
-  }
-
-  const setEducation = (newEducation: EducationEntry[]) => {
-    updatePortfolioData(prev => ({ ...prev!, education: newEducation }));
-  };
+  const setEducation = useCallback((newEducation: EducationEntry[]) => {
+    updatePortfolioData(prev => {
+      if (!prev) return { ...prev!, education: newEducation }; // Should not happen if isLoading handled
+      return { ...prev, education: newEducation };
+    });
+  }, [updatePortfolioData]);
 
   const renderEducationItem = useCallback((
     item: EducationEntry,
@@ -46,6 +45,10 @@ export default function AdminEducationPage() {
     grade: '',
   }), []);
 
+  if (isLoading || !portfolioData) {
+    return <AdminLayout><p>Loading education editor...</p></AdminLayout>;
+  }
+
   return (
     <AdminLayout>
       <EditableSectionWrapper
@@ -53,7 +56,7 @@ export default function AdminEducationPage() {
         description="Manage your academic qualifications."
       >
         <ArrayManager
-          items={portfolioData.education}
+          items={portfolioData.education || []}
           setItems={setEducation}
           renderItem={renderEducationItem}
           generateNewItem={generateNewEducationItem}
