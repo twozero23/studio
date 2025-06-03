@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, Trash2, Edit2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input'; // Re-import Input here
 
 interface ArrayManagerProps<T extends { id: string }> {
   items: T[];
@@ -25,12 +26,15 @@ export function ArrayManager<T extends { id: string }>({
 
   const handleAddItem = useCallback(() => {
     const newItem = generateNewItem();
-    // Ensure items is an array before spreading
-    setItems((prevItems: T[] = []) => [...prevItems, newItem]);
-    // items.length might be incorrect here if prevItems was [] due to async nature.
-    // Calculate length based on what it will be *after* adding.
-    setEditingIndex((prevItems: T[] = []) => prevItems.length); 
-  }, [generateNewItem, setItems]);
+    // Ensure items is an array before spreading.
+    // The 'setItems' prop callback updates the parent's state.
+    setItems((prevParentItems: T[] = []) => [...prevParentItems, newItem]);
+    
+    // Set editingIndex to the length of the current 'items' prop.
+    // This will be the index of the newly added item.
+    // 'items' here refers to the prop passed to ArrayManager at the time of this call.
+    setEditingIndex(items.length); 
+  }, [generateNewItem, setItems, items]); // Added 'items' to dependency array
 
   const handleRemoveItem = useCallback((index: number) => {
     setItems((prevItems: T[] = []) => prevItems.filter((_, i) => i !== index));
@@ -54,7 +58,7 @@ export function ArrayManager<T extends { id: string }>({
   
   const handleMoveItem = useCallback((index: number, direction: 'up' | 'down') => {
     setItems((prevItems: T[] = []) => {
-      if (!prevItems || prevItems.length === 0) return []; // Should not happen if items prop is guarded
+      if (!prevItems || prevItems.length === 0) return [];
       if (direction === 'up' && index === 0) return prevItems;
       if (direction === 'down' && index === prevItems.length - 1) return prevItems;
 
@@ -69,7 +73,6 @@ export function ArrayManager<T extends { id: string }>({
       }
       return newItems;
     });
-     // Adjust editing index if the currently edited item moved
     setEditingIndex(currentEditingIndex => {
       if (currentEditingIndex === index) {
         return direction === 'up' ? index - 1 : index + 1;
@@ -83,7 +86,7 @@ export function ArrayManager<T extends { id: string }>({
 
   return (
     <div className="space-y-4">
-      {(items || []).map((item, index) => ( // Defensive check: (items || [])
+      {(items || []).map((item, index) => (
         <Card key={item.id} className="overflow-hidden">
           <CardContent className="p-4">
             <div className="flex justify-between items-center mb-2">
@@ -124,11 +127,10 @@ export function ArrayManager<T extends { id: string }>({
   );
 }
 
-// Helper for managing string arrays within an item (e.g., responsibilities, achievements)
 interface StringListManagerProps {
   list: string[];
   setList: (newList: string[]) => void;
-  label: string; // e.g. "Responsibility"
+  label: string; 
 }
 
 const StringListManagerInternal: React.FC<StringListManagerProps> = ({ list, setList, label }) => {
@@ -144,7 +146,7 @@ const StringListManagerInternal: React.FC<StringListManagerProps> = ({ list, set
 
   return (
     <div className="space-y-2">
-      {(list || []).map((str, index) => ( // Defensive check
+      {(list || []).map((str, index) => (
         <div key={index} className="flex items-center gap-2">
           <Input
             type="text"
@@ -165,7 +167,3 @@ const StringListManagerInternal: React.FC<StringListManagerProps> = ({ list, set
   );
 };
 export const StringListManager = React.memo(StringListManagerInternal);
-
-// Re-exporting Input to avoid direct import of shadcn/ui/input in multiple admin pages
-import { Input } from '@/components/ui/input';
-

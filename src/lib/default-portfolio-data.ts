@@ -220,7 +220,7 @@ export const defaultPortfolioData: PortfolioData = {
     {
       id: 'edu3',
       degree: 'GCE O-Level',
-      institution: 'Beaconhouse School System',
+      institution: 'Chenab College Jhang',
       period: '2007 – 2009',
     },
   ],
