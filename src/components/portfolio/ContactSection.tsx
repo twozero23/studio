@@ -77,7 +77,7 @@ export const ContactSection = () => {
             I'm always open to discussing new projects, creative ideas, or opportunities to be part of something transformative. Feel free to reach out!
           </p>
           <div className="flex flex-row flex-wrap justify-center items-center gap-x-4 gap-y-3">
-            <ContactItem icon={Mail} href={`mailto:${contact.email}`} ariaLabel="Email Nauman Mehdi"/> {/* Text prop removed */}
+            <ContactItem icon={Mail} text="Email" href={`mailto:${contact.email}`} ariaLabel="Email Nauman Mehdi"/>
             <ContactItem icon={Linkedin} text="LinkedIn" href={`https://${contact.linkedin}`} ariaLabel="Nauman Mehdi's LinkedIn Profile"/>
             {contact.github && <ContactItem icon={Github} text="GitHub" href={contact.github.startsWith('http') ? contact.github : `https://${contact.github}`} ariaLabel="Nauman Mehdi's GitHub Profile"/>}
             {contact.x && <ContactItem icon={Twitter} text="X" href={contact.x} ariaLabel="Nauman Mehdi's X Profile"/>}
