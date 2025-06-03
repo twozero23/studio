@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { createContext, useContext, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, ReactNode, useCallback } from 'react';
 import { usePortfolioData } from '@/hooks/usePortfolioData';
 import type { PortfolioData, PortfolioTheme, FontOption } from '@/lib/portfolio-data-types';
 import { AVAILABLE_FONTS, DEFAULT_FONT, DEFAULT_ACCENT_COLOR } from '@/lib/portfolio-data-types';
@@ -14,6 +14,8 @@ interface AppContextType {
   resetPortfolioData: () => void;
   currentFont: FontOption;
   currentAccentColor: string;
+  themeMode: 'light' | 'dark';
+  toggleThemeMode: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -23,6 +25,25 @@ export const AppProviders = ({ children }: { children: ReactNode }) => {
 
   const currentFont = portfolioData?.theme?.font || DEFAULT_FONT;
   const currentAccentColor = portfolioData?.theme?.accentColor || DEFAULT_ACCENT_COLOR;
+  const themeMode = portfolioData?.theme?.mode || 'light';
+
+  const toggleThemeMode = useCallback(() => {
+    updateTheme(prevTheme => ({
+      ...prevTheme,
+      mode: prevTheme.mode === 'light' ? 'dark' : 'light',
+    }));
+  }, [updateTheme]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const root = window.document.documentElement;
+      if (themeMode === 'dark') {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+    }
+  }, [themeMode]);
 
   useEffect(() => {
     if (portfolioData) {
@@ -33,22 +54,18 @@ export const AppProviders = ({ children }: { children: ReactNode }) => {
       // Apply custom accent color
       document.documentElement.style.setProperty('--custom-accent-color', portfolioData.theme.accentColor);
 
-      // Attempt to parse HSL from the accentColor to update the theme's generic --accent variable
-      // Fallback to the default --accent HSL values from globals.css (Sunny Coral & Teal theme) if parsing fails.
-      // Default Teal: hsl(170, 60%, 45%)
       const h = portfolioData.theme.accentColor.match(/hsl\(([^,]+),/)?.[1] || '170';
-      const s = portfolioData.theme.accentColor.match(/,\s*([^%]+)%,/)?.[1] || '60'; // just the number
-      const l = portfolioData.theme.accentColor.match(/,\s*[^%]+%,\s*([^%]+)%\)/)?.[1] || '45'; // just the number
+      const s = portfolioData.theme.accentColor.match(/,\s*([^%]+)%,/)?.[1] || '60'; 
+      const l = portfolioData.theme.accentColor.match(/,\s*[^%]+%,\s*([^%]+)%\)/)?.[1] || '45'; 
 
       document.documentElement.style.setProperty('--accent-h', h);
       document.documentElement.style.setProperty('--accent-s', `${s}%`);
       document.documentElement.style.setProperty('--accent-l', `${l}%`);
-
     }
   }, [portfolioData]);
 
   return (
-    <AppContext.Provider value={{ portfolioData, isLoading, updatePortfolioData, updateTheme, resetPortfolioData, currentFont, currentAccentColor }}>
+    <AppContext.Provider value={{ portfolioData, isLoading, updatePortfolioData, updateTheme, resetPortfolioData, currentFont, currentAccentColor, themeMode, toggleThemeMode }}>
       {children}
     </AppContext.Provider>
   );

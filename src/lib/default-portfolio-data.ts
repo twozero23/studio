@@ -49,7 +49,7 @@ export const defaultPortfolioData: PortfolioData = {
       ],
       achievements: [
         'Resulted in a 40% productivity boost.',
-        'Achieved a 20% profit growth (30.9M PKR) by enabling real-time data access.',
+        'Achieved a 20% profit growth (30 Million PKR) by enabling real-time data access.',
       ],
     },
     {
@@ -225,8 +225,9 @@ export const defaultPortfolioData: PortfolioData = {
     },
   ],
   theme: {
-    accentColor: '#F88A78', 
+    accentColor: DEFAULT_ACCENT_COLOR, 
     font: DEFAULT_FONT,
+    mode: 'light',
     profilePictureUrl: '', 
   },
   customSections: [],

@@ -20,6 +20,7 @@ export const usePortfolioData = () => {
         const validatedTheme: PortfolioTheme = {
           accentColor: parsedData.theme?.accentColor || defaultPortfolioData.theme.accentColor,
           font: parsedData.theme?.font || defaultPortfolioData.theme.font,
+          mode: parsedData.theme?.mode || defaultPortfolioData.theme.mode,
           profilePictureUrl: parsedData.theme?.profilePictureUrl || defaultPortfolioData.theme.profilePictureUrl,
         };
         setPortfolioData({ ...defaultPortfolioData, ...parsedData, theme: validatedTheme });
@@ -50,8 +51,10 @@ export const usePortfolioData = () => {
   const updateTheme = useCallback((newTheme: Partial<PortfolioTheme> | ((prevTheme: PortfolioTheme) => PortfolioTheme)) => {
     setPortfolioData(prevData => {
       if (!prevData) return null;
-      const updatedTheme = typeof newTheme === 'function' ? newTheme(prevData.theme) : { ...prevData.theme, ...newTheme };
-      const updatedData = { ...prevData, theme: updatedTheme };
+      const currentTheme = prevData.theme || defaultPortfolioData.theme;
+      const updatedThemeObject = typeof newTheme === 'function' ? newTheme(currentTheme) : { ...currentTheme, ...newTheme };
+      
+      const updatedData = { ...prevData, theme: updatedThemeObject };
       try {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedData));
       } catch (error) {

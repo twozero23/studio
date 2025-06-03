@@ -3,9 +3,10 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Sun, Moon, UserCircle } from 'lucide-react'; // UserCircle as placeholder for logo/initials
+import { Menu, X } from 'lucide-react'; 
 import { useAppContext } from '@/components/AppProviders';
 import Image from 'next/image';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const NavLinks = [
   { href: '#hero', label: 'Home' },
@@ -44,7 +45,7 @@ export const PortfolioNavbar = () => {
   };
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled || isOpen ? 'bg-background shadow-lg py-3' : 'bg-transparent py-5'}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled || isOpen ? 'bg-background/80 backdrop-blur-sm shadow-lg py-3' : 'bg-transparent py-5'}`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         <Link href="#hero" onClick={(e) => handleLinkClick(e, '#hero')} className="flex items-center gap-2 text-xl font-bold" style={{ color: 'hsl(var(--primary))' }}>
           {profilePictureUrl ? (
@@ -57,7 +58,7 @@ export const PortfolioNavbar = () => {
           <span className="hidden sm:inline">{name}</span>
         </Link>
 
-        <div className="hidden md:flex space-x-2">
+        <div className="hidden md:flex items-center space-x-1">
           {NavLinks.map((link) => (
             <Button key={link.label} variant="ghost" asChild className="text-foreground hover:text-primary hover:bg-primary/10">
               <Link href={link.href} onClick={(e) => handleLinkClick(e, link.href)}>
@@ -65,9 +66,11 @@ export const PortfolioNavbar = () => {
               </Link>
             </Button>
           ))}
+          <ThemeToggle />
         </div>
 
-        <div className="md:hidden">
+        <div className="md:hidden flex items-center">
+          <ThemeToggle />
           <Button variant="ghost" size="icon" onClick={toggleMenu} aria-label="Toggle menu">
             {isOpen ? <X className="h-6 w-6 text-primary" /> : <Menu className="h-6 w-6 text-primary" />}
           </Button>
@@ -76,7 +79,7 @@ export const PortfolioNavbar = () => {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-background shadow-lg pb-4">
+        <div className="md:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-sm shadow-lg pb-4">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col space-y-2 pt-2">
             {NavLinks.map((link) => (
               <Button key={link.label} variant="ghost" asChild className="w-full justify-start text-foreground hover:text-primary hover:bg-primary/10">

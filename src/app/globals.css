@@ -56,35 +56,49 @@ body {
   }
 
   .dark {
-    /* Define dark mode if explicitly needed, for now portfolio is light-only */
-    /* Example dark theme (can be expanded if dashboard needs it or portfolio gets a dark mode toggle) */
-    --background: 220 15% 10%;
-    --foreground: 210 40% 98%;
+    --background: 20 10% 12%; /* Very Dark Warm Brown/Gray */
+    --foreground: 35 30% 85%; /* Light Peachy Gray */
 
-    --card: 220 15% 15%;
-    --card-foreground: 210 40% 98%;
+    --card: 20 10% 18%; /* Slightly Lighter Dark Warm Brown/Gray */
+    --card-foreground: 35 30% 85%;
 
-    --popover: 220 15% 15%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 20 10% 18%;
+    --popover-foreground: 35 30% 85%;
 
-    --primary: 10 75% 60%; /* Coral, slightly adjusted for dark mode */
-    --primary-foreground: 20 20% 10%; /* Dark for on-coral text */
+    --primary: 10 80% 60%; /* Coral - slightly adjusted for dark mode */
+    --primary-foreground: 10 80% 95%; /* Very light for on-coral text */
 
-    --secondary: 40 80% 80%; /* Lighter yellow for dark mode */
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 170 40% 25%; /* Darker Teal for secondary elements in dark mode */
+    --secondary-foreground: 170 50% 80%; /* Lighter Teal text for on dark teal bg */
 
-    --muted: 220 15% 20%;
-    --muted-foreground: 210 40% 70%;
+    --muted: 20 10% 25%; /* Dark muted gray */
+    --muted-foreground: 35 20% 65%; /* Lighter muted gray text */
 
-    --accent: 170 50% 50%; /* Teal, adjusted for dark mode */
-    --accent-foreground: 220 10% 10%;
+    --accent: 170 65% 55%; /* Teal - kept vibrant */
+    --accent-foreground: 170 90% 95%; /* Very light for contrast on teal */
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 70% 50%; /* Destructive Red, adjusted for dark */
+    --destructive-foreground: 0 0% 95%;
 
-    --border: 220 15% 30%;
-    --input: 220 15% 30%;
-    --ring: 10 75% 60%;
+    --border: 20 10% 30%; /* Dark border */
+    --input: 20 10% 30%;
+    --ring: 10 80% 60%; /* Primary Coral for focus rings */
+
+    /* Sidebar specific colors for dark mode */
+    --sidebar-background: 20 10% 10%; /* Even darker for sidebar */
+    --sidebar-foreground: 35 30% 80%;
+    --sidebar-primary: 10 75% 55%;
+    --sidebar-primary-foreground: 10 80% 95%;
+    --sidebar-accent: 170 60% 50%;
+    --sidebar-accent-foreground: 170 90% 95%;
+    --sidebar-border: 20 10% 25%;
+    --sidebar-ring: 10 75% 55%;
+
+    --chart-1: 12 70% 55%;
+    --chart-2: 173 50% 45%;
+    --chart-3: 197 30% 30%;
+    --chart-4: 43 70% 60%;
+    --chart-5: 27 80% 60%;
   }
 }
 

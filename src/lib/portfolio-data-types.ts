@@ -81,7 +81,7 @@ export interface CustomSectionEntry {
 export interface PortfolioTheme {
   accentColor: string; // hex string
   font: string; // Google Font name e.g. 'Roboto'
-  // mode: 'light' | 'dark'; // Keeping portfolio light as per spec
+  mode: 'light' | 'dark'; 
   profilePictureUrl?: string; // URL for profile picture
 }
 
