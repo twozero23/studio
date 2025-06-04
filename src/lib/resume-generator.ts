@@ -20,49 +20,72 @@ function checkAndAddPage(doc: jsPDF, requiredHeight: number = LINE_HEIGHT * 2) {
 }
 
 function addText(doc: jsPDF, text: string | string[], x: number, options?: any, isBold = false, fontSize?: number) {
-    checkAndAddPage(doc);
-    const originalFontSize = doc.getFontSize();
-    const originalFont = doc.getFont();
+    checkAndAddPage(doc); // Initial check before any operations
+
+    const originalDocFontSize = doc.getFontSize();
+    const currentFont = doc.getFont(); // Get current font name and style
 
     if (fontSize) {
         doc.setFontSize(fontSize);
     }
+
+    let targetStyle = currentFont.fontStyle;
     if (isBold) {
-        doc.setFont(originalFont.fontName, 'bold', originalFont.fontStyle);
-    } else {
-        doc.setFont(originalFont.fontName, 'normal', originalFont.fontStyle);
+        if (currentFont.fontStyle === 'italic' || currentFont.fontStyle === 'bolditalic') {
+            targetStyle = 'bolditalic';
+        } else {
+            targetStyle = 'bold';
+        }
+    } else { // isBold is false, ensure normal weight for this text segment
+        if (currentFont.fontStyle === 'bold') {
+            targetStyle = 'normal';
+        } else if (currentFont.fontStyle === 'bolditalic') {
+            targetStyle = 'italic';
+        }
+        // If currentFont.fontStyle is 'normal' or 'italic', targetStyle remains as currentFont.fontStyle
     }
     
-    doc.text(text, x, yPos, options);
+    doc.setFont(currentFont.fontName, targetStyle);
     
-    if (isBold) {
-         doc.setFont(originalFont.fontName, originalFont.fontStyle); // Reset to original style
-    }
-    if (fontSize) {
-        doc.setFontSize(originalFontSize); // Reset font size
+    const textToRenderArray = Array.isArray(text) ? text : doc.splitTextToSize(text.toString(), options?.maxWidth || CONTENT_WIDTH);
+    const numLinesForRender = textToRenderArray.length;
+    const lineHeightFactor = options?.lineHeightFactor || 0.9;
+    const estimatedHeightForRender = numLinesForRender * lineHeightFactor * LINE_HEIGHT;
+    
+    checkAndAddPage(doc, estimatedHeightForRender); // Check again if the processed text block fits
+
+    doc.text(textToRenderArray, x, yPos, options);
+    
+    // Reset font to what it was *before this function's specific styling*
+    doc.setFont(currentFont.fontName, currentFont.fontStyle); 
+    if (fontSize) { // Reset font size if it was changed by this call
+        doc.setFontSize(originalDocFontSize);
     }
 
-
-    if (Array.isArray(text)) {
-         yPos += text.length * (options?.lineHeightFactor || 0.9) * LINE_HEIGHT;
-    } else {
-        yPos += LINE_HEIGHT * (options?.lineHeightFactor || 0.9);
-    }
+    yPos += estimatedHeightForRender;
 }
+
 
 function addHeading(doc: jsPDF, text: string, level: 1 | 2 | 3 = 1) {
     yPos += (level === 1 ? SECTION_SPACING : SUB_SECTION_SPACING) / 2;
-    checkAndAddPage(doc, (level === 1 ? 12 : 10) + SUB_SECTION_SPACING); // Estimate height for heading
+    checkAndAddPage(doc, (level === 1 ? 12 : 10) + SUB_SECTION_SPACING); 
 
     const fontSize = level === 1 ? 14 : (level === 2 ? 11 : 10);
-    addText(doc, text, MARGIN, {}, true, fontSize);
+    // For headings, yPos is handled by addText, but we want to ensure the line is drawn correctly relative to the text
+    const headingTextArray = doc.splitTextToSize(text, CONTENT_WIDTH);
+    const headingHeight = headingTextArray.length * (options?.lineHeightFactor || 0.9) * LINE_HEIGHT;
+
+
+    addText(doc, text, MARGIN, {}, true, fontSize); // addText will increment yPos
     
     if (level === 1) {
-        checkAndAddPage(doc, 1); // For the line
+        const lineYPos = yPos - (headingHeight / 2) + (LINE_HEIGHT * 0.5); // Adjust line position slightly if needed
+        checkAndAddPage(doc, 1); 
         doc.setLineWidth(0.3);
-        doc.line(MARGIN, yPos - LINE_HEIGHT * 0.5, MARGIN + CONTENT_WIDTH, yPos - LINE_HEIGHT * 0.5);
+        // Draw line just below the main heading text
+        doc.line(MARGIN, yPos - LINE_HEIGHT*0.3 , MARGIN + CONTENT_WIDTH, yPos-LINE_HEIGHT*0.3 );
     }
-    yPos += (level === 1 ? SECTION_SPACING : SUB_SECTION_SPACING) / 2;
+    // yPos += (level === 1 ? SECTION_SPACING : SUB_SECTION_SPACING) / 2; // Original spacing after heading, handled by addText and general flow
 }
 
 function addBulletPoint(doc: jsPDF, text: string, indent = 5) {
@@ -92,7 +115,7 @@ export function generateResumePdf(data: PortfolioData) {
     
     const contactLine = contactParts.join(' | ');
     addText(doc, contactLine, A4_WIDTH / 2, { align: 'center' }, false, 9);
-    yPos += SECTION_SPACING;
+    yPos += SECTION_SPACING / 2; // Reduced spacing after contact
 
     // --- Summary ---
     if (data.summary) {
@@ -117,7 +140,7 @@ export function generateResumePdf(data: PortfolioData) {
                  addText(doc, 'Key Achievements:', MARGIN, {lineHeightFactor: 1.2}, true, 10);
                  exp.achievements.forEach(ach => addBulletPoint(doc, ach, 7));
             }
-            yPos += SUB_SECTION_SPACING;
+            yPos += SUB_SECTION_SPACING / 2;
         });
     }
 
@@ -128,7 +151,7 @@ export function generateResumePdf(data: PortfolioData) {
             addHeading(doc, edu.degree, 2);
             addText(doc, edu.institution, MARGIN, {}, false, 10);
             addText(doc, `${edu.period}${edu.grade ? ` | Grade: ${edu.grade}` : ''}`, MARGIN, {}, false, 9);
-            yPos += SUB_SECTION_SPACING;
+            yPos += SUB_SECTION_SPACING / 2;
         });
     }
     
@@ -143,7 +166,7 @@ export function generateResumePdf(data: PortfolioData) {
                 const skillsText = skillArray.map(s => s.name).join(', ');
                 const skillLines = doc.splitTextToSize(skillsText, CONTENT_WIDTH);
                 addText(doc, skillLines, MARGIN);
-                yPos += SUB_SECTION_SPACING /2;
+                yPos += SUB_SECTION_SPACING / 2;
             }
         };
         
@@ -161,7 +184,7 @@ export function generateResumePdf(data: PortfolioData) {
                 addHeading(doc, category, 2);
                 const skillLines = doc.splitTextToSize(techSkillsByCategory[category].join(', '), CONTENT_WIDTH);
                 addText(doc, skillLines, MARGIN);
-                yPos += SUB_SECTION_SPACING /2;
+                yPos += SUB_SECTION_SPACING / 2;
             }
         }
         formatSkillsToList(tools, 'Tools & Technologies');
@@ -184,7 +207,7 @@ export function generateResumePdf(data: PortfolioData) {
                 const techLines = doc.splitTextToSize(`Technologies: ${proj.technologies.join(', ')}`, CONTENT_WIDTH);
                 addText(doc, techLines, MARGIN + 5);
             }
-            yPos += SUB_SECTION_SPACING;
+            yPos += SUB_SECTION_SPACING / 2;
         });
     }
     
@@ -195,6 +218,7 @@ export function generateResumePdf(data: PortfolioData) {
             const achText = `${ach.metric}: ${ach.description}`;
              addBulletPoint(doc, achText, 0);
         });
+         yPos += SUB_SECTION_SPACING / 2;
     }
     
     // --- Certifications ---
@@ -203,6 +227,7 @@ export function generateResumePdf(data: PortfolioData) {
         const certText = data.certifications.map(c => `${c.name}${c.issuer ? ` (${c.issuer})` : ''}`).join('; ');
         const certLines = doc.splitTextToSize(certText, CONTENT_WIDTH);
         addText(doc, certLines, MARGIN);
+        yPos += SUB_SECTION_SPACING / 2;
     }
     
     // --- Community Involvement ---
@@ -211,6 +236,7 @@ export function generateResumePdf(data: PortfolioData) {
         const communityText = data.communityInvolvement.map(c => `${c.name}${c.role ? ` - ${c.role}` : ''}`).join('; ');
         const communityLines = doc.splitTextToSize(communityText, CONTENT_WIDTH);
         addText(doc, communityLines, MARGIN);
+        yPos += SUB_SECTION_SPACING / 2;
     }
 
     // --- Custom Sections ---
@@ -223,7 +249,7 @@ export function generateResumePdf(data: PortfolioData) {
                         addBulletPoint(doc, `${item.key}: ${item.value}`, 0);
                     }
                 });
-                yPos += SUB_SECTION_SPACING;
+                yPos += SUB_SECTION_SPACING / 2;
             }
         });
     }
