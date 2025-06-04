@@ -72,14 +72,14 @@ function addHeading(doc: jsPDF, text: string, level: 1 | 2 | 3 = 1) {
 
     const fontSize = level === 1 ? 14 : (level === 2 ? 11 : 10);
     // For headings, yPos is handled by addText, but we want to ensure the line is drawn correctly relative to the text
-    const headingTextArray = doc.splitTextToSize(text, CONTENT_WIDTH);
-    const headingHeight = headingTextArray.length * (options?.lineHeightFactor || 0.9) * LINE_HEIGHT;
+    // const headingTextArray = doc.splitTextToSize(text, CONTENT_WIDTH); // This was for the unused headingHeight
+    // const headingHeight = headingTextArray.length * (options?.lineHeightFactor || 0.9) * LINE_HEIGHT; // Unused, and 'options' is not defined here
 
 
     addText(doc, text, MARGIN, {}, true, fontSize); // addText will increment yPos
     
     if (level === 1) {
-        const lineYPos = yPos - (headingHeight / 2) + (LINE_HEIGHT * 0.5); // Adjust line position slightly if needed
+        // const lineYPos = yPos - (headingHeight / 2) + (LINE_HEIGHT * 0.5); // Unused, and headingHeight relies on undefined 'options'
         checkAndAddPage(doc, 1); 
         doc.setLineWidth(0.3);
         // Draw line just below the main heading text
