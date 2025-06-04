@@ -5,14 +5,14 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, Trash2, Edit2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Input } from '@/components/ui/input'; // Re-import Input here
+import { Input } from '@/components/ui/input';
 
 interface ArrayManagerProps<T extends { id: string }> {
   items: T[];
-  setItems: React.Dispatch<React.SetStateAction<T[]>> | ((newItems: T[]) => void);
+  setItems: (newItems: T[]) => void; // Changed to expect the full new array
   renderItem: (item: T, index: number, onChange: (index: number, updatedItem: Partial<T>) => void, onMoveUp: (index: number) => void, onMoveDown: (index: number) => void) => React.ReactNode;
   generateNewItem: () => T;
-  itemTypeName: string; // e.g., "Experience Entry"
+  itemTypeName: string;
 }
 
 export function ArrayManager<T extends { id: string }>({
@@ -26,18 +26,16 @@ export function ArrayManager<T extends { id: string }>({
 
   const handleAddItem = useCallback(() => {
     const newItem = generateNewItem();
-    // Ensure items is an array before spreading.
-    // The 'setItems' prop callback updates the parent's state.
-    setItems((prevParentItems: T[] = []) => [...prevParentItems, newItem]);
-    
-    // Set editingIndex to the length of the current 'items' prop.
-    // This will be the index of the newly added item.
-    // 'items' here refers to the prop passed to ArrayManager at the time of this call.
-    setEditingIndex(items.length); 
-  }, [generateNewItem, setItems, items]); // Added 'items' to dependency array
+    const currentItems = items || [];
+    const newItemsArray = [...currentItems, newItem];
+    setItems(newItemsArray);
+    setEditingIndex(newItemsArray.length - 1); // Open editor for the new item
+  }, [generateNewItem, setItems, items]);
 
   const handleRemoveItem = useCallback((index: number) => {
-    setItems((prevItems: T[] = []) => prevItems.filter((_, i) => i !== index));
+    const currentItems = items || [];
+    const newItemsArray = currentItems.filter((_, i) => i !== index);
+    setItems(newItemsArray);
     setEditingIndex(currentEditingIndex => {
       if (currentEditingIndex === index) {
         return null;
@@ -46,33 +44,33 @@ export function ArrayManager<T extends { id: string }>({
       }
       return currentEditingIndex;
     });
-  }, [setItems]);
+  }, [setItems, items]);
 
-  const handleItemChange = useCallback((index: number, updatedItem: Partial<T>) => {
-    setItems((prevItems: T[] = []) => {
-      const newItems = [...prevItems];
-      newItems[index] = { ...newItems[index], ...updatedItem };
-      return newItems;
-    });
-  }, [setItems]);
+  const handleItemChange = useCallback((index: number, updatedItemPartial: Partial<T>) => {
+    const currentItems = items || [];
+    const newItemsArray = [...currentItems];
+    newItemsArray[index] = { ...newItemsArray[index], ...updatedItemPartial };
+    setItems(newItemsArray);
+  }, [setItems, items]);
   
   const handleMoveItem = useCallback((index: number, direction: 'up' | 'down') => {
-    setItems((prevItems: T[] = []) => {
-      if (!prevItems || prevItems.length === 0) return [];
-      if (direction === 'up' && index === 0) return prevItems;
-      if (direction === 'down' && index === prevItems.length - 1) return prevItems;
+    const currentItems = items || [];
+    if (currentItems.length === 0) return;
+    if (direction === 'up' && index === 0) return;
+    if (direction === 'down' && index === currentItems.length - 1) return;
 
-      const newItems = [...prevItems];
-      const itemToMove = newItems[index];
-      if (direction === 'up') {
-        newItems[index] = newItems[index - 1];
-        newItems[index - 1] = itemToMove;
-      } else { // down
-        newItems[index] = newItems[index + 1];
-        newItems[index + 1] = itemToMove;
-      }
-      return newItems;
-    });
+    const newItemsArray = [...currentItems];
+    const itemToMove = newItemsArray[index];
+    if (direction === 'up') {
+      newItemsArray[index] = newItemsArray[index - 1];
+      newItemsArray[index - 1] = itemToMove;
+    } else { // down
+      newItemsArray[index] = newItemsArray[index + 1];
+      newItemsArray[index + 1] = itemToMove;
+    }
+    setItems(newItemsArray);
+    
+    // Adjust editingIndex if the moved item or its swap partner was being edited
     setEditingIndex(currentEditingIndex => {
       if (currentEditingIndex === index) {
         return direction === 'up' ? index - 1 : index + 1;
@@ -81,7 +79,7 @@ export function ArrayManager<T extends { id: string }>({
       }
       return currentEditingIndex;
     });
-  }, [setItems]);
+  }, [setItems, items]);
 
 
   return (
@@ -167,3 +165,4 @@ const StringListManagerInternal: React.FC<StringListManagerProps> = ({ list, set
   );
 };
 export const StringListManager = React.memo(StringListManagerInternal);
+
