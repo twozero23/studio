@@ -5,11 +5,10 @@ import { useAppContext } from '@/components/AppProviders';
 import { Mail, Linkedin, Link as LinkIcon, Phone, Github, Twitter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import NextLink from 'next/link'; // Renamed to avoid conflict with LinkIcon
+import NextLink from 'next/link'; 
 import type React from 'react';
 import { cn } from '@/lib/utils';
 
-// Simplified Farcaster Icon Component
 const FarcasterIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" {...props}>
     <title>Farcaster</title>
@@ -17,7 +16,6 @@ const FarcasterIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   </svg>
 );
 
-// Simplified POAP Icon Component
 const POAPIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" {...props}>
     <title>POAP</title>
@@ -28,7 +26,7 @@ const POAPIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 
 interface ContactItemProps {
   icon: React.ElementType;
-  text?: string; // Text is now optional
+  text?: string; 
   href: string;
   ariaLabel: string;
 }
@@ -38,14 +36,14 @@ const ContactItem: React.FC<ContactItemProps> = ({ icon: Icon, text, href, ariaL
     variant="ghost"
     asChild
     className={cn(
-      "p-3 hover:bg-primary/10 group",
-      text ? "justify-start w-auto text-lg" : "justify-center w-12 h-12 aspect-square" // Icon-only buttons are square
+      "p-3 hover:bg-primary/10 group transition-all duration-200 ease-out transform hover:scale-105",
+      text ? "justify-start w-auto text-lg" : "justify-center w-12 h-12 aspect-square" 
     )}
   >
     <NextLink href={href} target="_blank" rel="noopener noreferrer" aria-label={ariaLabel}>
       <Icon className={cn(
         "text-primary group-hover:scale-110 transition-transform",
-        text ? "h-5 w-5 mr-2" : "h-6 w-6" // Larger icon if no text, no right margin
+        text ? "h-5 w-5 mr-2" : "h-6 w-6" 
       )} style={{ color: 'hsl(var(--primary))' }} />
       {text && <span className="text-foreground group-hover:text-primary text-sm sm:text-base">{text}</span>}
     </NextLink>
@@ -71,7 +69,7 @@ export const ContactSection = () => {
 
   return (
     <SectionLayout id="contact" title="Let's Connect" icon={Mail}>
-      <Card className="max-w-2xl mx-auto shadow-xl p-6 md:p-8">
+      <Card className="max-w-2xl mx-auto rounded-xl shadow-xl p-6 md:p-8 transition-all duration-300 ease-out hover:shadow-2xl hover:-translate-y-2 transform">
         <CardContent className="text-center">
           <p className="text-lg text-muted-foreground mb-8">
             I'm always open to discussing new projects, creative ideas, or opportunities to be part of something transformative. Feel free to reach out!

@@ -2,7 +2,7 @@
 "use client";
 import { SectionLayout } from '@/components/SectionLayout';
 import { useAppContext } from '@/components/AppProviders';
-import { Users, Award as CertificateIcon, CheckIcon } from 'lucide-react'; // Using Award for title, CheckIcon for items
+import { Users, Award as CertificateIcon, CheckIcon } from 'lucide-react'; 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
@@ -10,15 +10,14 @@ export const CommunityAndCertificationsSection = () => {
   const { portfolioData, isLoading } = useAppContext();
 
   if (isLoading || !portfolioData) {
-    // Basic skeleton for loading state
     return (
       <SectionLayout id="community-certs" title="Engagements & Credentials" icon={Users}>
         <div className="grid md:grid-cols-2 gap-8 animate-pulse">
-          <Card>
+          <Card className="rounded-xl">
             <CardHeader><div className="h-6 bg-muted rounded w-1/2 mb-2"></div></CardHeader>
             <CardContent><div className="h-4 bg-muted rounded w-full"></div></CardContent>
           </Card>
-          <Card>
+          <Card className="rounded-xl">
             <CardHeader><div className="h-6 bg-muted rounded w-1/2 mb-2"></div></CardHeader>
             <CardContent><div className="h-4 bg-muted rounded w-full"></div></CardContent>
           </Card>
@@ -33,7 +32,7 @@ export const CommunityAndCertificationsSection = () => {
     <SectionLayout id="community-certs" title="Engagements & Credentials" icon={Users}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
         {/* Community Involvement */}
-        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <Card className="rounded-xl shadow-lg transition-all duration-300 ease-out hover:shadow-2xl hover:-translate-y-2 transform">
           <CardHeader className="flex flex-row items-center space-x-3 pb-4">
             <Users className="h-7 w-7 text-primary" style={{ color: 'hsl(var(--primary))' }} />
             <CardTitle className="text-2xl font-semibold text-foreground">Community Involvement</CardTitle>
@@ -43,7 +42,11 @@ export const CommunityAndCertificationsSection = () => {
               <ul className="space-y-2">
                 {communityInvolvement.map(item => (
                   <li key={item.id} className="flex items-center">
-                    <Badge variant="outline" className="text-md py-1 px-3 border-primary/50 text-primary bg-primary/5" style={{color: 'hsl(var(--primary))', backgroundColor: 'hsl(var(--primary)/0.05)', borderColor: 'hsl(var(--primary)/0.5)'}}>
+                    <Badge 
+                      variant="outline" 
+                      className="text-md py-1 px-3 border-primary/50 text-primary bg-primary/5 transition-all duration-200 ease-out hover:scale-105" 
+                      style={{color: 'hsl(var(--primary))', backgroundColor: 'hsl(var(--primary)/0.05)', borderColor: 'hsl(var(--primary)/0.5)'}}
+                    >
                       {item.name}
                     </Badge>
                   </li>
@@ -56,7 +59,7 @@ export const CommunityAndCertificationsSection = () => {
         </Card>
 
         {/* Certifications */}
-        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <Card className="rounded-xl shadow-lg transition-all duration-300 ease-out hover:shadow-2xl hover:-translate-y-2 transform">
           <CardHeader className="flex flex-row items-center space-x-3 pb-4">
             <CertificateIcon className="h-7 w-7 text-primary" style={{ color: 'hsl(var(--primary))' }} />
             <CardTitle className="text-2xl font-semibold text-foreground">Certifications</CardTitle>

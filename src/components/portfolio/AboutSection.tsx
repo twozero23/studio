@@ -25,7 +25,7 @@ export const AboutSection = () => {
 
   return (
     <SectionLayout id="about" title="About Me" icon={User} className="bg-secondary">
-      <Card className="max-w-3xl mx-auto shadow-xl overflow-hidden bg-card">
+      <Card className="max-w-3xl mx-auto rounded-xl shadow-xl overflow-hidden bg-card transition-all duration-300 ease-out hover:shadow-2xl hover:-translate-y-2 transform">
         <CardContent className="p-8 md:p-10">
           <p className="text-lg md:text-xl text-card-foreground leading-relaxed whitespace-pre-line">
             {aboutMe || summary}

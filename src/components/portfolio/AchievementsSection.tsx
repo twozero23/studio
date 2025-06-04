@@ -27,7 +27,7 @@ export const AchievementsSection = () => {
       <SectionLayout id="achievements" title="Impact & Achievements" icon={Award}>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
           {[1, 2, 3].map(i => (
-            <Card key={i}>
+            <Card key={i} className="rounded-xl">
               <CardHeader>
                 <div className="h-10 w-10 bg-muted rounded-full mx-auto mb-2"></div>
                 <div className="h-8 bg-muted rounded w-1/3 mx-auto mb-1"></div>
@@ -45,15 +45,12 @@ export const AchievementsSection = () => {
   const parseMetric = (metric: string): number => {
     const lowerMetric = metric.toLowerCase();
     
-    // If metric contains "million", "billion", "thousand", "lakh", "crore" as whole words, treat as text.
     if (/\b(million|billion|thousand|lakh|crore)\b/i.test(lowerMetric)) {
       return NaN;
     }
 
-    // Standardize, remove currency symbols, commas, spaces for parsing.
-    // Keep '%' for getSuffix to handle.
     let numStr = lowerMetric.replace(/pkr|usd|eur|gbp|,|\s/gi, '');
-    numStr = numStr.replace(/%/g, ''); // Remove percent for parsing, suffix will add it back.
+    numStr = numStr.replace(/%/g, ''); 
 
     let multiplier = 1;
     if (numStr.endsWith('m')) {
@@ -70,7 +67,7 @@ export const AchievementsSection = () => {
     const parsedValue = parseFloat(numStr);
     
     if (isNaN(parsedValue)) {
-      return NaN; // If after all this, it's not a number, treat as text.
+      return NaN; 
     }
     
     return parsedValue * multiplier;
@@ -80,12 +77,11 @@ export const AchievementsSection = () => {
   const getSuffix = (metric: string): string => {
     if (metric.includes('%')) return '%';
     if (metric.toLowerCase().includes('pkr')) return ' PKR';
-    // Add other currency/unit handling here if needed
     return '';
   }
 
   const getPrefix = (metric: string): string => {
-    return ''; // Add prefix logic if needed
+    return ''; 
   }
 
 
@@ -113,7 +109,10 @@ export const AchievementsSection = () => {
           }
           
           return (
-            <Card key={achievement.id} className="text-center shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
+            <Card 
+              key={achievement.id} 
+              className="text-center rounded-xl shadow-lg transition-all duration-300 ease-out hover:shadow-2xl hover:-translate-y-2 transform"
+            >
               <CardHeader className="items-center pb-2">
                  <div className="p-3 rounded-full bg-primary/10 mb-3">
                     <IconComponent className="h-8 w-8 text-primary" style={{ color: 'hsl(var(--primary))' }} />

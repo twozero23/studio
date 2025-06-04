@@ -7,6 +7,7 @@ import { Menu, X } from 'lucide-react';
 import { useAppContext } from '@/components/AppProviders';
 import Image from 'next/image';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { cn } from '@/lib/utils';
 
 const NavLinks = [
   { href: '#hero', label: 'Home' },
@@ -45,9 +46,13 @@ export const PortfolioNavbar = () => {
   };
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled || isOpen ? 'bg-background/80 backdrop-blur-sm shadow-lg py-3' : 'bg-transparent py-5'}`}>
+    <nav className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out",
+        isScrolled || isOpen ? 'bg-background/80 backdrop-blur-md shadow-xl py-3' : 'bg-transparent py-5'
+      )}
+    >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        <Link href="#hero" onClick={(e) => handleLinkClick(e, '#hero')} className="flex items-center gap-2 text-xl font-bold" style={{ color: 'hsl(var(--primary))' }}>
+        <Link href="#hero" onClick={(e) => handleLinkClick(e, '#hero')} className="flex items-center gap-2 text-xl font-bold transition-colors duration-200 ease-out hover:text-primary" style={{ color: 'hsl(var(--primary))' }}>
           {profilePictureUrl ? (
             <Image src={profilePictureUrl} alt={name} width={36} height={36} className="rounded-full border-2 border-primary" data-ai-hint="profile avatar"/>
           ) : (
@@ -60,7 +65,7 @@ export const PortfolioNavbar = () => {
 
         <div className="hidden md:flex items-center space-x-1">
           {NavLinks.map((link) => (
-            <Button key={link.label} variant="ghost" asChild className="text-foreground hover:text-primary hover:bg-primary/10">
+            <Button key={link.label} variant="ghost" asChild className="text-foreground transition-colors duration-200 ease-out hover:text-primary hover:bg-primary/10">
               <Link href={link.href} onClick={(e) => handleLinkClick(e, link.href)}>
                 {link.label}
               </Link>
@@ -79,10 +84,10 @@ export const PortfolioNavbar = () => {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-sm shadow-lg pb-4">
+        <div className="md:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-md shadow-lg pb-4">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col space-y-2 pt-2">
             {NavLinks.map((link) => (
-              <Button key={link.label} variant="ghost" asChild className="w-full justify-start text-foreground hover:text-primary hover:bg-primary/10">
+              <Button key={link.label} variant="ghost" asChild className="w-full justify-start text-foreground transition-colors duration-200 ease-out hover:text-primary hover:bg-primary/10">
                 <Link href={link.href} onClick={(e) => handleLinkClick(e, link.href)}>
                   {link.label}
                 </Link>

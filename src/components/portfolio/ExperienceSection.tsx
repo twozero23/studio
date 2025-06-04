@@ -13,7 +13,7 @@ export const ExperienceSection = () => {
       <SectionLayout id="experience" title="Professional Journey" icon={Briefcase}>
         <div className="space-y-8 max-w-3xl mx-auto">
           {[1, 2].map(i => (
-            <Card key={i} className="animate-pulse p-6 shadow-lg">
+            <Card key={i} className="animate-pulse p-6 shadow-lg rounded-xl">
               <div className="h-7 bg-muted rounded w-3/4 mb-3"></div> {/* Role */}
               <div className="h-5 bg-muted rounded w-1/2 mb-2"></div> {/* Company/Location */}
               <div className="h-4 bg-muted rounded w-1/3 mb-5"></div> {/* Period */}
@@ -37,7 +37,10 @@ export const ExperienceSection = () => {
         {experience.map((job) => {
           const keyContributions = [...job.responsibilities, ...job.achievements];
           return (
-            <Card key={job.id} className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card 
+              key={job.id} 
+              className="rounded-xl shadow-lg transition-all duration-300 ease-out hover:shadow-2xl hover:-translate-y-2 transform"
+            >
               <CardHeader className="pb-3">
                 <CardTitle className="text-xl md:text-2xl font-semibold text-foreground">{job.role}</CardTitle>
                 <p className="text-md font-medium text-primary pt-1" style={{ color: 'hsl(var(--primary))' }}>

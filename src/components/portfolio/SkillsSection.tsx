@@ -14,7 +14,7 @@ interface SkillCategoryProps {
 }
 
 const SkillCategoryCard: React.FC<SkillCategoryProps> = ({ title, skills, icon: Icon }) => (
-  <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
+  <Card className="rounded-xl shadow-lg transition-all duration-300 ease-out hover:shadow-2xl hover:-translate-y-2 transform flex flex-col h-full">
     <CardHeader className="flex flex-row items-center space-x-3 pb-3">
       <Icon className="h-6 w-6 text-primary" style={{ color: 'hsl(var(--primary))' }} />
       <CardTitle className="text-xl font-semibold text-foreground">{title}</CardTitle>
@@ -22,7 +22,12 @@ const SkillCategoryCard: React.FC<SkillCategoryProps> = ({ title, skills, icon: 
     <CardContent className="flex-grow">
       <div className="flex flex-wrap gap-2">
         {skills.map(skill => (
-          <Badge key={skill.id} variant="secondary" className="px-3 py-1 text-sm bg-primary/10 text-primary border-primary/30 hover:bg-primary/20" style={{ backgroundColor:'hsl(var(--primary)/0.1)', color:'hsl(var(--primary))', borderColor: 'hsl(var(--primary)/0.3)'}}>
+          <Badge 
+            key={skill.id} 
+            variant="secondary" 
+            className="px-3 py-1 text-sm bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 transition-all duration-200 ease-out hover:scale-105" 
+            style={{ backgroundColor:'hsl(var(--primary)/0.1)', color:'hsl(var(--primary))', borderColor: 'hsl(var(--primary)/0.3)'}}
+          >
             {skill.name}
           </Badge>
         ))}
@@ -40,7 +45,7 @@ export const SkillsSection = () => {
       <SectionLayout id="skills" title="Skills & Expertise" icon={Zap}>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
           {[1, 2, 3].map(i => (
-            <Card key={i}>
+            <Card key={i} className="rounded-xl">
               <CardHeader>
                 <div className="h-6 bg-muted rounded w-1/2 mb-2"></div>
               </CardHeader>

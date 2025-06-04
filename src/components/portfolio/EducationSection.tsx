@@ -13,7 +13,7 @@ export const EducationSection = () => {
       <SectionLayout id="education" title="Education" icon={GraduationCap}>
         <div className="space-y-6 animate-pulse">
           {[1, 2].map(i => (
-            <Card key={i}>
+            <Card key={i} className="rounded-xl">
               <CardHeader>
                 <div className="h-6 bg-muted rounded w-3/4 mb-2"></div>
                 <div className="h-4 bg-muted rounded w-1/2"></div>
@@ -31,7 +31,10 @@ export const EducationSection = () => {
     <SectionLayout id="education" title="Academic Background" icon={GraduationCap} className="bg-secondary">
       <div className="max-w-2xl mx-auto space-y-6">
         {education.map(edu => (
-          <Card key={edu.id} className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <Card 
+            key={edu.id} 
+            className="rounded-xl shadow-lg transition-all duration-300 ease-out hover:shadow-2xl hover:-translate-y-2 transform"
+          >
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-primary flex items-center gap-2" style={{ color: 'hsl(var(--primary))' }}>
                 <GraduationCap className="h-6 w-6" /> {edu.degree}

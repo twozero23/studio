@@ -17,8 +17,7 @@ export const ProjectsSection = () => {
       <SectionLayout id="projects" title="Key Projects" icon={Lightbulb}>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 animate-pulse">
           {[1, 2, 3].map(i => (
-            <Card key={i}>
-              {/* Image placeholder removed from skeleton */}
+            <Card key={i} className="rounded-xl">
               <CardHeader>
                 <div className="h-6 bg-muted rounded w-3/4 mb-2"></div>
                 <div className="h-4 bg-muted rounded w-1/2"></div>
@@ -40,8 +39,10 @@ export const ProjectsSection = () => {
     <SectionLayout id="projects" title="Signature Projects" icon={Lightbulb}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {projects.map(project => (
-          <Card key={project.id} className="flex flex-col shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-            {/* Image and placeholder rendering removed */}
+          <Card 
+            key={project.id} 
+            className="flex flex-col rounded-xl shadow-lg transition-all duration-300 ease-out hover:shadow-2xl hover:-translate-y-2 transform overflow-hidden"
+          >
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-primary" style={{ color: 'hsl(var(--primary))' }}>{project.name}</CardTitle>
               <CardDescription className="text-sm text-muted-foreground italic">Role: {project.role}</CardDescription>
