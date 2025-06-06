@@ -8,7 +8,7 @@ const A4_WIDTH = 210;
 const A4_HEIGHT = 297;
 const MARGIN = 15;
 const CONTENT_WIDTH = A4_WIDTH - 2 * MARGIN;
-const LINE_HEIGHT = 6; // Adjusted line height for better spacing with 10pt font
+const LINE_HEIGHT = 6; // Base line height reference, though actual height will be used more.
 const SECTION_SPACING = 8;
 const SUB_SECTION_SPACING = 4;
 
@@ -20,78 +20,89 @@ function checkAndAddPage(doc: jsPDF, requiredHeight: number = LINE_HEIGHT * 2) {
 }
 
 function addText(doc: jsPDF, text: string | string[], x: number, options?: any, isBold = false, fontSize?: number) {
-    checkAndAddPage(doc); // Initial check before any operations
+    checkAndAddPage(doc); 
 
-    const originalDocFontSize = doc.getFontSize();
-    const currentFont = doc.getFont(); // Get current font name and style
+    const initialDocFont = doc.getFont();
+    const initialDocFontSize = doc.getFontSize();
 
+    // 1. Set font for this segment (for drawing and measurement)
     if (fontSize) {
         doc.setFontSize(fontSize);
     }
-
-    let targetStyle = currentFont.fontStyle;
-    if (isBold) {
-        if (currentFont.fontStyle === 'italic' || currentFont.fontStyle === 'bolditalic') {
-            targetStyle = 'bolditalic';
-        } else {
-            targetStyle = 'bold';
-        }
-    } else { // isBold is false, ensure normal weight for this text segment
-        if (currentFont.fontStyle === 'bold') {
-            targetStyle = 'normal';
-        } else if (currentFont.fontStyle === 'bolditalic') {
-            targetStyle = 'italic';
-        }
-        // If currentFont.fontStyle is 'normal' or 'italic', targetStyle remains as currentFont.fontStyle
+    // Determine the style for *this* segment
+    let segmentStyle = initialDocFont.fontStyle;
+    if (isBold) { // If this segment needs to be bold
+        segmentStyle = (segmentStyle === 'italic' || segmentStyle === 'bolditalic') ? 'bolditalic' : 'bold';
+    } else { // If this segment needs to NOT be bold (i.e., normal or italic from initial)
+        segmentStyle = (segmentStyle === 'bold') ? 'normal' : (segmentStyle === 'bolditalic') ? 'italic' : segmentStyle;
     }
-    
-    doc.setFont(currentFont.fontName, targetStyle);
-    
-    const textToRenderArray = Array.isArray(text) ? text : doc.splitTextToSize(text.toString(), options?.maxWidth || CONTENT_WIDTH);
-    const numLinesForRender = textToRenderArray.length;
-    const lineHeightFactor = options?.lineHeightFactor || 0.9;
-    const estimatedHeightForRender = numLinesForRender * lineHeightFactor * LINE_HEIGHT;
-    
-    checkAndAddPage(doc, estimatedHeightForRender); // Check again if the processed text block fits
+    doc.setFont(initialDocFont.fontName, segmentStyle);
 
+    // 2. Prepare text and measure
+    const textToRenderArray = Array.isArray(text) ? text : doc.splitTextToSize(text.toString(), options?.maxWidth || CONTENT_WIDTH);
+    // Get dimensions with the font that will be used for rendering.
+    // For getTextDimensions, ensure font name, style, and size are currently active on the doc.
+    const dims = doc.getTextDimensions(textToRenderArray.join('\n')); // Use joined array for block dimensions
+    const actualBlockHeight = dims.h;
+
+    // 3. Check page and draw
+    checkAndAddPage(doc, actualBlockHeight); 
+    // Font (name, style, size) is already set from step 1 for drawing.
     doc.text(textToRenderArray, x, yPos, options);
     
-    // Reset font to what it was *before this function's specific styling*
-    doc.setFont(currentFont.fontName, currentFont.fontStyle); 
-    if (fontSize) { // Reset font size if it was changed by this call
-        doc.setFontSize(originalDocFontSize);
-    }
+    // 4. Restore original document font state that was active when addText was called
+    doc.setFont(initialDocFont.fontName, initialDocFont.fontStyle);
+    doc.setFontSize(initialDocFontSize);
 
-    yPos += estimatedHeightForRender;
+    // 5. Update yPos
+    yPos += actualBlockHeight; 
 }
 
 
 function addHeading(doc: jsPDF, text: string, level: 1 | 2 | 3 = 1) {
     yPos += (level === 1 ? SECTION_SPACING : SUB_SECTION_SPACING) / 2;
-    checkAndAddPage(doc, (level === 1 ? 12 : 10) + SUB_SECTION_SPACING); 
+    
+    const headingFontSize = level === 1 ? 14 : (level === 2 ? 11 : 10);
 
-    const fontSize = level === 1 ? 14 : (level === 2 ? 11 : 10);
-    // For headings, yPos is handled by addText, but we want to ensure the line is drawn correctly relative to the text
-    // const headingTextArray = doc.splitTextToSize(text, CONTENT_WIDTH); // This was for the unused headingHeight
-    // const headingHeight = headingTextArray.length * (options?.lineHeightFactor || 0.9) * LINE_HEIGHT; // Unused, and 'options' is not defined here
+    // Estimate required height for page check more accurately
+    const tempInitialFont = doc.getFont();
+    const tempInitialFontSize = doc.getFontSize();
+    doc.setFontSize(headingFontSize);
+    doc.setFont(tempInitialFont.fontName, 'bold'); // Headings are bold
+    const estHeadingHeight = doc.getTextDimensions(text).h;
+    doc.setFont(tempInitialFont.fontName, tempInitialFont.fontStyle); // Restore
+    doc.setFontSize(tempInitialFontSize); // Restore
 
+    checkAndAddPage(doc, estHeadingHeight + SUB_SECTION_SPACING);
 
-    addText(doc, text, MARGIN, {}, true, fontSize); // addText will increment yPos
+    addText(doc, text, MARGIN, {}, true, headingFontSize); 
     
     if (level === 1) {
-        // const lineYPos = yPos - (headingHeight / 2) + (LINE_HEIGHT * 0.5); // Unused, and headingHeight relies on undefined 'options'
+        // Get width of the heading text for the underline
+        const originalDocFontSize = doc.getFontSize(); 
+        const originalDocFont = doc.getFont();     
+        
+        doc.setFontSize(headingFontSize);
+        doc.setFont(originalDocFont.fontName, 'bold');
+
+        const textWidth = doc.getTextWidth(text);
+
+        doc.setFont(originalDocFont.fontName, originalDocFont.fontStyle);
+        doc.setFontSize(originalDocFontSize);
+        
         checkAndAddPage(doc, 1); 
         doc.setLineWidth(0.3);
-        // Draw line just below the main heading text
-        doc.line(MARGIN, yPos - LINE_HEIGHT*0.3 , MARGIN + CONTENT_WIDTH, yPos-LINE_HEIGHT*0.3 );
+        // yPos is now *after* the heading text block.
+        // Draw the line 2mm above where the next content would start, to place it under the text.
+        doc.line(MARGIN, yPos - 2, MARGIN + textWidth, yPos - 2);
     }
-    // yPos += (level === 1 ? SECTION_SPACING : SUB_SECTION_SPACING) / 2; // Original spacing after heading, handled by addText and general flow
 }
 
 function addBulletPoint(doc: jsPDF, text: string, indent = 5) {
     const bulletText = `• ${text}`;
     const lines = doc.splitTextToSize(bulletText, CONTENT_WIDTH - indent);
-    addText(doc, lines, MARGIN + indent, { lineHeightFactor: 1 });
+    // For bullet points, a slightly larger line height factor can improve readability
+    addText(doc, lines, MARGIN + indent, { lineHeightFactor: 1.1 });
 }
 
 
@@ -115,7 +126,7 @@ export function generateResumePdf(data: PortfolioData) {
     
     const contactLine = contactParts.join(' | ');
     addText(doc, contactLine, A4_WIDTH / 2, { align: 'center' }, false, 9);
-    yPos += SECTION_SPACING / 2; // Reduced spacing after contact
+    yPos += SECTION_SPACING / 2; 
 
     // --- Summary ---
     if (data.summary) {
@@ -137,7 +148,7 @@ export function generateResumePdf(data: PortfolioData) {
             }
             if (exp.achievements && exp.achievements.length > 0) {
                  yPos += SUB_SECTION_SPACING / 2;
-                 addText(doc, 'Key Achievements:', MARGIN, {lineHeightFactor: 1.2}, true, 10);
+                 addText(doc, 'Key Achievements:', MARGIN, {lineHeightFactor: 1.1}, true, 10);
                  exp.achievements.forEach(ach => addBulletPoint(doc, ach, 7));
             }
             yPos += SUB_SECTION_SPACING / 2;
