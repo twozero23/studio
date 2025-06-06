@@ -1,11 +1,15 @@
-
 "use client";
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import dynamic from 'next/dynamic';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
 import { FormFieldComponent as FormField } from '@/components/admin/FormField';
 import { useAppContext } from '@/components/AppProviders';
 import type { PortfolioData, ContactInfo } from '@/lib/portfolio-data-types';
 import React, { useCallback } from 'react'; 
+
+const AdminLayout = dynamic(
+  () => import('@/components/admin/AdminLayout').then(mod => mod.AdminLayout),
+  { ssr: false }
+);
 
 export default function AdminGeneralPage() {
   const { portfolioData, updatePortfolioData, isLoading } = useAppContext();

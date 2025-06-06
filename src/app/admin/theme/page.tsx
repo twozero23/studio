@@ -1,6 +1,5 @@
-
 "use client";
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import dynamic from 'next/dynamic';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
 import { FormFieldComponent as FormField } from '@/components/admin/FormField';
 import { useAppContext } from '@/components/AppProviders';
@@ -10,12 +9,16 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AVAILABLE_FONTS, DEFAULT_FONT, DEFAULT_ACCENT_COLOR } from '@/lib/portfolio-data-types';
 import type { PortfolioTheme, FontOption } from '@/lib/portfolio-data-types';
-import React, { useCallback } from 'react'; // Import useCallback
+import React, { useCallback } from 'react';
+
+const AdminLayout = dynamic(
+  () => import('@/components/admin/AdminLayout').then(mod => mod.AdminLayout),
+  { ssr: false }
+);
 
 export default function AdminThemePage() {
   const { portfolioData, updateTheme, isLoading, currentFont, currentAccentColor } = useAppContext();
   
-  // Moved hook calls to the top
   const handleThemeChange = useCallback((field: keyof PortfolioTheme, value: string) => {
     updateTheme(prevTheme => ({ ...prevTheme, [field]: value }));
   }, [updateTheme]);
@@ -28,11 +31,9 @@ export default function AdminThemePage() {
     handleThemeChange('font', DEFAULT_FONT);
   }, [handleThemeChange]);
 
-
   if (isLoading || !portfolioData) {
     return <AdminLayout><p>Loading theme settings...</p></AdminLayout>;
   }
-
 
   return (
     <AdminLayout>
@@ -102,7 +103,6 @@ export default function AdminThemePage() {
             />
         </div>
 
-        {/* Preview (Conceptual) */}
         <div className="mt-6 border-t pt-6">
             <h4 className="text-md font-semibold mb-2">Live Preview (Example)</h4>
             <div className="p-4 border rounded-md" style={{ fontFamily: AVAILABLE_FONTS.find(f => f.name === currentFont)?.value, borderColor: currentAccentColor }}>

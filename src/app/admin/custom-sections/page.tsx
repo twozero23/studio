@@ -1,7 +1,6 @@
-
 "use client";
 import React, { useCallback } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import dynamic from 'next/dynamic';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
 import { ArrayManager } from '@/components/admin/ArrayManager'; 
 import { FormFieldComponent as FormField } from '@/components/admin/FormField';
@@ -11,6 +10,11 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Trash2 } from 'lucide-react';
+
+const AdminLayout = dynamic(
+  () => import('@/components/admin/AdminLayout').then(mod => mod.AdminLayout),
+  { ssr: false }
+);
 
 export default function AdminCustomSectionsPage() {
   const { portfolioData, updatePortfolioData, isLoading } = useAppContext();

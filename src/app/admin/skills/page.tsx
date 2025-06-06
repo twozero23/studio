@@ -1,7 +1,6 @@
-
 "use client";
 import React, { useCallback } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import dynamic from 'next/dynamic';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
 import { ArrayManager } from '@/components/admin/ArrayManager';
 import { FormFieldComponent as FormField } from '@/components/admin/FormField';
@@ -9,6 +8,11 @@ import { useAppContext } from '@/components/AppProviders';
 import type { Skill } from '@/lib/portfolio-data-types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from '@/components/ui/label';
+
+const AdminLayout = dynamic(
+  () => import('@/components/admin/AdminLayout').then(mod => mod.AdminLayout),
+  { ssr: false }
+);
 
 const SKILL_CATEGORIES = [
   'Blockchain & Web3',

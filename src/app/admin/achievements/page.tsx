@@ -1,7 +1,6 @@
-
 "use client";
 import React, { useCallback } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import dynamic from 'next/dynamic';
 import { EditableSectionWrapper } from '@/components/admin/EditableSectionWrapper';
 import { ArrayManager } from '@/components/admin/ArrayManager';
 import { FormFieldComponent as FormField } from '@/components/admin/FormField';
@@ -11,6 +10,11 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Award, TrendingUp, Zap, DollarSign, Users, Smile, PieChart, ShieldCheck } from 'lucide-react';
+
+const AdminLayout = dynamic(
+  () => import('@/components/admin/AdminLayout').then(mod => mod.AdminLayout),
+  { ssr: false }
+);
 
 const ICON_OPTIONS = [
   { value: 'Award', label: 'Award', icon: Award },
