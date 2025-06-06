@@ -8,11 +8,11 @@ const A4_WIDTH = 210;
 const A4_HEIGHT = 297;
 const MARGIN = 15;
 const CONTENT_WIDTH = A4_WIDTH - 2 * MARGIN;
-const LINE_HEIGHT = 6; // Base line height reference, though actual height will be used more.
-const SECTION_SPACING = 8;
-const SUB_SECTION_SPACING = 4;
+const SECTION_SPACING = 7; // Increased slightly
+const SUB_SECTION_SPACING = 3; // Increased slightly
+const ITEM_SPACING = 1.5; // Small spacing after individual text items or bullets
 
-function checkAndAddPage(doc: jsPDF, requiredHeight: number = LINE_HEIGHT * 2) {
+function checkAndAddPage(doc: jsPDF, requiredHeight: number = 5) { // Default required height
     if (yPos + requiredHeight > A4_HEIGHT - MARGIN) {
         doc.addPage();
         yPos = MARGIN;
@@ -20,89 +20,87 @@ function checkAndAddPage(doc: jsPDF, requiredHeight: number = LINE_HEIGHT * 2) {
 }
 
 function addText(doc: jsPDF, text: string | string[], x: number, options?: any, isBold = false, fontSize?: number) {
-    checkAndAddPage(doc); 
+    // 1. Save original document font state
+    const originalDocFontName = doc.getFont().fontName;
+    const originalDocFontStyle = doc.getFont().fontStyle;
+    const originalDocFontSize = doc.getFontSize();
 
-    const initialDocFont = doc.getFont();
-    const initialDocFontSize = doc.getFontSize();
+    // 2. Determine and set font for *this* text segment
+    let targetStyle = originalDocFontStyle;
+    if (isBold) {
+        targetStyle = (originalDocFontStyle === 'italic' || originalDocFontStyle === 'bolditalic') ? 'bolditalic' : 'bold';
+    } else {
+        if (originalDocFontStyle === 'bold') targetStyle = 'normal';
+        else if (originalDocFontStyle === 'bolditalic') targetStyle = 'italic';
+        // otherwise, it's already 'normal' or 'italic', keep as is.
+    }
+    doc.setFont(originalDocFontName, targetStyle);
 
-    // 1. Set font for this segment (for drawing and measurement)
     if (fontSize) {
         doc.setFontSize(fontSize);
     }
-    // Determine the style for *this* segment
-    let segmentStyle = initialDocFont.fontStyle;
-    if (isBold) { // If this segment needs to be bold
-        segmentStyle = (segmentStyle === 'italic' || segmentStyle === 'bolditalic') ? 'bolditalic' : 'bold';
-    } else { // If this segment needs to NOT be bold (i.e., normal or italic from initial)
-        segmentStyle = (segmentStyle === 'bold') ? 'normal' : (segmentStyle === 'bolditalic') ? 'italic' : segmentStyle;
-    }
-    doc.setFont(initialDocFont.fontName, segmentStyle);
 
-    // 2. Prepare text and measure
-    const textToRenderArray = Array.isArray(text) ? text : doc.splitTextToSize(text.toString(), options?.maxWidth || CONTENT_WIDTH);
-    // Get dimensions with the font that will be used for rendering.
-    // For getTextDimensions, ensure font name, style, and size are currently active on the doc.
-    const dims = doc.getTextDimensions(textToRenderArray.join('\n')); // Use joined array for block dimensions
+    // 3. Prepare text lines
+    const textLines = Array.isArray(text) ? text : doc.splitTextToSize(text.toString(), options?.maxWidth || CONTENT_WIDTH);
+
+    // 4. Measure text block height with current font settings
+    const dims = doc.getTextDimensions(textLines.join('\n')); // Use .join for multi-line block height
     const actualBlockHeight = dims.h;
 
-    // 3. Check page and draw
-    checkAndAddPage(doc, actualBlockHeight); 
-    // Font (name, style, size) is already set from step 1 for drawing.
-    doc.text(textToRenderArray, x, yPos, options);
-    
-    // 4. Restore original document font state that was active when addText was called
-    doc.setFont(initialDocFont.fontName, initialDocFont.fontStyle);
-    doc.setFontSize(initialDocFontSize);
+    // 5. Check for page break
+    checkAndAddPage(doc, actualBlockHeight); // yPos might change if page is added
 
-    // 5. Update yPos
-    yPos += actualBlockHeight; 
+    // 6. Draw the text
+    doc.text(textLines, x, yPos, options);
+
+    // 7. Restore original document font state
+    doc.setFont(originalDocFontName, originalDocFontStyle);
+    doc.setFontSize(originalDocFontSize);
+
+    // 8. Update yPos by the height of the rendered text ONLY
+    yPos += actualBlockHeight;
 }
 
 
 function addHeading(doc: jsPDF, text: string, level: 1 | 2 | 3 = 1) {
-    yPos += (level === 1 ? SECTION_SPACING : SUB_SECTION_SPACING) / 2;
-    
+    yPos += (level === 1 ? SECTION_SPACING : SUB_SECTION_SPACING); // Space before heading
+
     const headingFontSize = level === 1 ? 14 : (level === 2 ? 11 : 10);
-
-    // Estimate required height for page check more accurately
-    const tempInitialFont = doc.getFont();
-    const tempInitialFontSize = doc.getFontSize();
-    doc.setFontSize(headingFontSize);
-    doc.setFont(tempInitialFont.fontName, 'bold'); // Headings are bold
-    const estHeadingHeight = doc.getTextDimensions(text).h;
-    doc.setFont(tempInitialFont.fontName, tempInitialFont.fontStyle); // Restore
-    doc.setFontSize(tempInitialFontSize); // Restore
-
-    checkAndAddPage(doc, estHeadingHeight + SUB_SECTION_SPACING);
-
-    addText(doc, text, MARGIN, {}, true, headingFontSize); 
     
+    // Save current font state before measuring/drawing heading
+    const originalDocFontName = doc.getFont().fontName;
+    const originalDocFontStyle = doc.getFont().fontStyle;
+    const originalDocFontSize = doc.getFontSize();
+
+    // Set font for measuring heading text width and estimating height
+    doc.setFont(originalDocFontName, 'bold');
+    doc.setFontSize(headingFontSize);
+    const textWidth = doc.getTextWidth(text);
+    const estHeadingHeight = doc.getTextDimensions(text).h;
+
+    // Restore font before calling addText, as addText will manage its own segment's font
+    doc.setFont(originalDocFontName, originalDocFontStyle);
+    doc.setFontSize(originalDocFontSize);
+
+    checkAndAddPage(doc, estHeadingHeight + (level === 1 ? 2 : 0)); // Ensure space for text & underline
+
+    addText(doc, text, MARGIN, {}, true, headingFontSize); // yPos is now at the baseline for the *next* element
+
     if (level === 1) {
-        // Get width of the heading text for the underline
-        const originalDocFontSize = doc.getFontSize(); 
-        const originalDocFont = doc.getFont();     
-        
-        doc.setFontSize(headingFontSize);
-        doc.setFont(originalDocFont.fontName, 'bold');
-
-        const textWidth = doc.getTextWidth(text);
-
-        doc.setFont(originalDocFont.fontName, originalDocFont.fontStyle);
-        doc.setFontSize(originalDocFontSize);
-        
-        checkAndAddPage(doc, 1); 
         doc.setLineWidth(0.3);
-        // yPos is now *after* the heading text block.
-        // Draw the line 2mm above where the next content would start, to place it under the text.
-        doc.line(MARGIN, yPos - 2, MARGIN + textWidth, yPos - 2);
+        // Draw line 0.5mm below the baseline where the heading text just ended.
+        doc.line(MARGIN, yPos + 0.5, MARGIN + textWidth, yPos + 0.5);
+        yPos += 1.5; // Account for line (0.5mm) and add 1mm padding after underline
+    } else {
+        yPos += ITEM_SPACING; // Add small padding after L2/L3 headings
     }
 }
 
 function addBulletPoint(doc: jsPDF, text: string, indent = 5) {
     const bulletText = `• ${text}`;
-    const lines = doc.splitTextToSize(bulletText, CONTENT_WIDTH - indent);
-    // For bullet points, a slightly larger line height factor can improve readability
-    addText(doc, lines, MARGIN + indent, { lineHeightFactor: 1.1 });
+    // Pass options for maxWidth to enable auto-wrapping within addText
+    addText(doc, bulletText, MARGIN + indent, { maxWidth: CONTENT_WIDTH - indent, lineHeightFactor: 1.1 });
+    yPos += ITEM_SPACING / 2; // Small padding after a bullet point
 }
 
 
@@ -115,8 +113,9 @@ export function generateResumePdf(data: PortfolioData) {
 
     // --- Header ---
     addText(doc, data.name, A4_WIDTH / 2, { align: 'center' }, true, 18);
+    yPos += ITEM_SPACING;
     addText(doc, data.title, A4_WIDTH / 2, { align: 'center' }, false, 11);
-    yPos += SUB_SECTION_SPACING / 2;
+    yPos += ITEM_SPACING / 2;
 
     let contactParts: string[] = [];
     if (data.contact.email) contactParts.push(data.contact.email);
@@ -126,43 +125,50 @@ export function generateResumePdf(data: PortfolioData) {
     
     const contactLine = contactParts.join(' | ');
     addText(doc, contactLine, A4_WIDTH / 2, { align: 'center' }, false, 9);
-    yPos += SECTION_SPACING / 2; 
+    // yPos += SECTION_SPACING / 2; // Spacing before first section is handled by addHeading
 
     // --- Summary ---
     if (data.summary) {
         addHeading(doc, 'Summary', 1);
-        const summaryLines = doc.splitTextToSize(data.summary, CONTENT_WIDTH);
-        addText(doc, summaryLines, MARGIN);
+        addText(doc, data.summary, MARGIN);
+        yPos += ITEM_SPACING; // Padding after summary text
     }
 
     // --- Experience ---
     if (data.experience && data.experience.length > 0) {
         addHeading(doc, 'Experience', 1);
-        data.experience.forEach(exp => {
+        data.experience.forEach((exp, expIndex) => {
+            if (expIndex > 0) yPos += SUB_SECTION_SPACING; // Add space between experience entries
             addHeading(doc, `${exp.role} | ${exp.company}`, 2);
             addText(doc, `${exp.period}${exp.location ? ` | ${exp.location}` : ''}`, MARGIN, {}, false, 9);
+            yPos += ITEM_SPACING; 
             
             if (exp.responsibilities && exp.responsibilities.length > 0) {
-                yPos += SUB_SECTION_SPACING / 3;
+                // yPos += ITEM_SPACING / 2;
                 exp.responsibilities.forEach(resp => addBulletPoint(doc, resp));
+                // yPos += ITEM_SPACING / 2; // Padding after block of responsibilities
             }
             if (exp.achievements && exp.achievements.length > 0) {
                  yPos += SUB_SECTION_SPACING / 2;
                  addText(doc, 'Key Achievements:', MARGIN, {lineHeightFactor: 1.1}, true, 10);
+                 yPos += ITEM_SPACING;
                  exp.achievements.forEach(ach => addBulletPoint(doc, ach, 7));
+                //  yPos += ITEM_SPACING / 2;
             }
-            yPos += SUB_SECTION_SPACING / 2;
+            // yPos += SUB_SECTION_SPACING / 2; // Space after an entire experience entry, handled by next loop or section
         });
     }
 
     // --- Education ---
     if (data.education && data.education.length > 0) {
         addHeading(doc, 'Education', 1);
-        data.education.forEach(edu => {
+        data.education.forEach((edu, eduIndex) => {
+            if (eduIndex > 0) yPos += SUB_SECTION_SPACING;
             addHeading(doc, edu.degree, 2);
             addText(doc, edu.institution, MARGIN, {}, false, 10);
+            yPos += ITEM_SPACING / 2;
             addText(doc, `${edu.period}${edu.grade ? ` | Grade: ${edu.grade}` : ''}`, MARGIN, {}, false, 9);
-            yPos += SUB_SECTION_SPACING / 2;
+            // yPos += SUB_SECTION_SPACING / 2;
         });
     }
     
@@ -175,9 +181,8 @@ export function generateResumePdf(data: PortfolioData) {
             if (skillArray && skillArray.length > 0) {
                 addHeading(doc, categoryTitle, 2);
                 const skillsText = skillArray.map(s => s.name).join(', ');
-                const skillLines = doc.splitTextToSize(skillsText, CONTENT_WIDTH);
-                addText(doc, skillLines, MARGIN);
-                yPos += SUB_SECTION_SPACING / 2;
+                addText(doc, skillsText, MARGIN);
+                // yPos += SUB_SECTION_SPACING / 2;
             }
         };
         
@@ -191,11 +196,13 @@ export function generateResumePdf(data: PortfolioData) {
                 techSkillsByCategory[category].push(skill.name);
             });
 
+            let firstCategory = true;
             for (const category in techSkillsByCategory) {
+                if (!firstCategory) yPos += SUB_SECTION_SPACING / 2;
                 addHeading(doc, category, 2);
-                const skillLines = doc.splitTextToSize(techSkillsByCategory[category].join(', '), CONTENT_WIDTH);
-                addText(doc, skillLines, MARGIN);
-                yPos += SUB_SECTION_SPACING / 2;
+                addText(doc, techSkillsByCategory[category].join(', '), MARGIN);
+                firstCategory = false;
+                // yPos += SUB_SECTION_SPACING / 2;
             }
         }
         formatSkillsToList(tools, 'Tools & Technologies');
@@ -205,20 +212,22 @@ export function generateResumePdf(data: PortfolioData) {
     // --- Projects ---
     if (data.projects && data.projects.length > 0) {
         addHeading(doc, 'Projects', 1);
-        data.projects.forEach(proj => {
+        data.projects.forEach((proj, projIndex) => {
+            if (projIndex > 0) yPos += SUB_SECTION_SPACING;
             addHeading(doc, `${proj.name} (${proj.role})`, 2);
-            const descLines = doc.splitTextToSize(proj.description, CONTENT_WIDTH);
-            addText(doc, descLines, MARGIN);
+            addText(doc, proj.description, MARGIN);
+            yPos += ITEM_SPACING;
             if (proj.highlights && proj.highlights.length > 0) {
-                 yPos += SUB_SECTION_SPACING / 2;
+                // yPos += ITEM_SPACING / 2;
                 proj.highlights.forEach(hl => addBulletPoint(doc, hl));
+                // yPos += ITEM_SPACING / 2;
             }
             if (proj.technologies && proj.technologies.length > 0) {
-                yPos += SUB_SECTION_SPACING / 2;
-                const techLines = doc.splitTextToSize(`Technologies: ${proj.technologies.join(', ')}`, CONTENT_WIDTH);
-                addText(doc, techLines, MARGIN + 5);
+                yPos += ITEM_SPACING;
+                addText(doc, `Technologies: ${proj.technologies.join(', ')}`, MARGIN + 5); // Indented slightly
+                // yPos += ITEM_SPACING;
             }
-            yPos += SUB_SECTION_SPACING / 2;
+            // yPos += SUB_SECTION_SPACING / 2;
         });
     }
     
@@ -229,25 +238,23 @@ export function generateResumePdf(data: PortfolioData) {
             const achText = `${ach.metric}: ${ach.description}`;
              addBulletPoint(doc, achText, 0);
         });
-         yPos += SUB_SECTION_SPACING / 2;
+        //  yPos += SUB_SECTION_SPACING / 2;
     }
     
     // --- Certifications ---
     if (data.certifications && data.certifications.length > 0) {
         addHeading(doc, 'Certifications', 1);
         const certText = data.certifications.map(c => `${c.name}${c.issuer ? ` (${c.issuer})` : ''}`).join('; ');
-        const certLines = doc.splitTextToSize(certText, CONTENT_WIDTH);
-        addText(doc, certLines, MARGIN);
-        yPos += SUB_SECTION_SPACING / 2;
+        addText(doc, certText, MARGIN);
+        // yPos += SUB_SECTION_SPACING / 2;
     }
     
     // --- Community Involvement ---
     if (data.communityInvolvement && data.communityInvolvement.length > 0) {
         addHeading(doc, 'Community Involvement & Awards', 1);
         const communityText = data.communityInvolvement.map(c => `${c.name}${c.role ? ` - ${c.role}` : ''}`).join('; ');
-        const communityLines = doc.splitTextToSize(communityText, CONTENT_WIDTH);
-        addText(doc, communityLines, MARGIN);
-        yPos += SUB_SECTION_SPACING / 2;
+        addText(doc, communityText, MARGIN);
+        // yPos += SUB_SECTION_SPACING / 2;
     }
 
     // --- Custom Sections ---
@@ -260,7 +267,7 @@ export function generateResumePdf(data: PortfolioData) {
                         addBulletPoint(doc, `${item.key}: ${item.value}`, 0);
                     }
                 });
-                yPos += SUB_SECTION_SPACING / 2;
+                // yPos += SUB_SECTION_SPACING / 2;
             }
         });
     }
